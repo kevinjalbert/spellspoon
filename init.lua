@@ -34,8 +34,8 @@ function obj:createRecordingIndicator()
     local frame = screen:frame()
 
     -- Create a centered rectangle with improved dimensions
-    local indicatorWidth = 160
-    local indicatorHeight = 44
+    local indicatorWidth = 180
+    local indicatorHeight = 60
 
     local rect = hs.geometry.rect(
         frame.w/2 - indicatorWidth/2,
@@ -50,7 +50,7 @@ function obj:createRecordingIndicator()
     self.recordingIndicator[1] = {
         type = "rectangle",
         action = "fill",
-        fillColor = { red = 0.1, green = 0.1, blue = 0.1, alpha = 0.85 },
+        fillColor = { red = 0.1, green = 0.1, blue = 0.1, alpha = 0.75 },
         roundedRectRadii = { xRadius = 12, yRadius = 12 },
     }
 
@@ -58,8 +58,9 @@ function obj:createRecordingIndicator()
     self.recordingIndicator[2] = {
         type = "circle",
         action = "fill",
-        fillColor = { red = 1, green = 0, blue = 0, alpha = 0.8 },
-        frame = { x = 16, y = 14, w = 8, h = 8 },
+        fillColor = { red = 1, green = 0, blue = 0, alpha = 0.75 },
+        center = { x = 28, y = 30 },
+        radius = 10, -- Using radius instead of width/height for a true circle
     }
 
     -- Add "Recording ..." text
@@ -68,20 +69,18 @@ function obj:createRecordingIndicator()
         text = "Recording ...",
         textColor = { white = 1, alpha = 0.9 },
         textFont = "AppleSystemUIFont",
-        textSize = 14,
-        frame = { x = 32, y = 10, w = 100, h = 20 },
-        textAlignment = "left",
+        textSize = 16,
+        frame = { x = 60, y = 10, w = 100, h = 20 }, -- Adjusted x position to account for new dot position
     }
 
     -- Add counter text below "Recording ..."
     self.recordingIndicator[4] = {
         type = "text",
         text = "00:00",
-        textColor = { white = 1, alpha = 0.95 },
+        textColor = { white = 1, alpha = 0.90 },
         textFont = "AppleSystemUIFont",
-        textSize = 14,
-        frame = { x = 32, y = 30, w = 100, h = 20 },
-        textAlignment = "left",
+        textSize = 16,
+        frame = { x = 60, y = 30, w = 100, h = 20 }, -- Adjusted x position to match above text
     }
 
     -- Function for pulsing animation for the dot
@@ -129,7 +128,6 @@ function obj:stopRecording(interrupted)
             self.recordingIndicator = nil
         end
         self.isRecording = false
-        self.startTime = nil
         return
     end
 
@@ -169,15 +167,21 @@ function obj:stopRecording(interrupted)
     end)
 
     self.isRecording = false
-    self.startTime = nil
 end
 
 function obj:setProcessingStatus()
     if self.recordingIndicator then
         -- Update modal to display "Processing..."
         self.recordingIndicator[3].text = "Processing ..."
-        self.recordingIndicator[4] = nil -- Remove the timer text
+        self.recordingIndicator[4].text = "00:00" -- Reset timer display
         self.recordingIndicator[2].fillColor = { red = 0, green = 0.5, blue = 1, alpha = 0.8 } -- Change dot color to blue
+
+        -- Reset timer and start counting again
+        self.startTime = os.time()
+        if self.recordingTimer then
+            self.recordingTimer:stop()
+        end
+        self.recordingTimer = hs.timer.doEvery(1, function() self:updateTimer() end)
     end
 end
 
