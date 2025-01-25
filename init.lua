@@ -33,13 +33,17 @@ function obj:createRecordingIndicator()
     local screen = hs.screen.primaryScreen()
     local frame = screen:frame()
 
-    -- Create a centered rectangle with improved dimensions
+    -- Fixed dimensions for the indicator
     local indicatorWidth = 180
     local indicatorHeight = 60
 
+    -- Only make positioning responsive
+    local horizontalPadding = frame.w * 0.03  -- 3% from right edge
+    local verticalPadding = 24 + 16  -- menu bar + fixed padding
+
     local rect = hs.geometry.rect(
-        frame.w/2 - indicatorWidth/2,
-        frame.h/2 - indicatorHeight/2,
+        frame.w - indicatorWidth - horizontalPadding,
+        verticalPadding,
         indicatorWidth,
         indicatorHeight
     )
@@ -54,13 +58,13 @@ function obj:createRecordingIndicator()
         roundedRectRadii = { xRadius = 12, yRadius = 12 },
     }
 
-    -- Add recording indicator dot (centered vertically relative to the text)
+    -- Add recording indicator dot
     self.recordingIndicator[2] = {
         type = "circle",
         action = "fill",
         fillColor = { red = 1, green = 0, blue = 0, alpha = 0.75 },
-        center = { x = 28, y = 30 },
-        radius = 10, -- Using radius instead of width/height for a true circle
+        center = { x = 28, y = indicatorHeight / 2 },
+        radius = 8,
     }
 
     -- Add "Recording ..." text
@@ -69,8 +73,13 @@ function obj:createRecordingIndicator()
         text = "Recording ...",
         textColor = { white = 1, alpha = 0.9 },
         textFont = "AppleSystemUIFont",
-        textSize = 16,
-        frame = { x = 60, y = 10, w = 100, h = 20 }, -- Adjusted x position to account for new dot position
+        textSize = 14,
+        frame = {
+            x = 48,
+            y = 10,
+            w = 120,
+            h = 20
+        },
     }
 
     -- Add counter text below "Recording ..."
@@ -79,8 +88,13 @@ function obj:createRecordingIndicator()
         text = "00:00",
         textColor = { white = 1, alpha = 0.90 },
         textFont = "AppleSystemUIFont",
-        textSize = 16,
-        frame = { x = 60, y = 30, w = 100, h = 20 }, -- Adjusted x position to match above text
+        textSize = 14,
+        frame = {
+            x = 48,
+            y = 30,
+            w = 120,
+            h = 20
+        },
     }
 
     -- Function for pulsing animation for the dot
@@ -147,8 +161,23 @@ function obj:stopRecording(interrupted)
                 local handleTask = hs.task.new(os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/handle_post_transcription.sh", function(handleExitCode, handleStdOut, handleStdErr)
                     if handleExitCode == 0 and handleStdOut then
                         hs.pasteboard.setContents(handleStdOut) -- Store processed transcription in clipboard
-                        hs.eventtap.keyStroke({"cmd"}, "v") -- Trigger a single paste event
-                        self.logger.d("Post-transcription handling completed")
+
+                        -- Check if there's an active text field before attempting to paste
+                        local focused = hs.uielement.focusedElement()
+                        local shouldPaste = false
+
+                        if focused then
+                            local success, role = pcall(function() return focused:role() end)
+                            if success and role then
+                                shouldPaste = (role == "AXTextField" or role == "AXTextArea")
+                            end
+                        end
+
+                        if shouldPaste then
+                            hs.eventtap.keyStroke({"cmd"}, "v")
+                        else
+                            hs.alert.show("Transcription copied to clipboard")
+                        end
                     else
                         self.logger.e("Post-transcription handling failed: " .. (handleStdErr or "unknown error"))
                     end
