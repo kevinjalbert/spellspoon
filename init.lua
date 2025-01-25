@@ -1,9 +1,23 @@
 --- === Whiston ===
 ---
---- A simple hotkey to trigger a command.
+--- A Hammerspoon Spoon that provides audio recording and transcription functionality.
 ---
---- Configurable properties (with default values):
----     word = "works"
+--- Features:
+---  * Start/stop audio recording with a configurable hotkey (default: cmd+alt+ctrl+w)
+---  * Automatic transcription of recorded audio
+---  * Visual feedback through UI elements during recording
+---
+--- Usage:
+---  * Load and configure the spoon in your Hammerspoon configuration
+---  * Use the default hotkey or configure custom bindings
+---
+--- Example:
+---```
+---   hs.loadSpoon("Whiston")
+---   spoon.Whiston:bindHotkeys({
+---       whiston = {{"cmd", "alt", "ctrl"}, "w"}  -- Default binding
+---   })
+---```
 ---
 --- Download: xxxxx
 
