@@ -108,20 +108,28 @@ function M:setStatus(message, dotColor)
     end
 end
 
-function M:setProcessingStatus()
-    -- Change dot color to blue for processing
-    local processingColor = { red = 0, green = 0.5, blue = 1, alpha = 0.8 }
-    self:setStatus("Processing ...", processingColor)
+function M:setIndicatorStatus(config)
+    -- config = {
+    --   dotColor = { red = x, green = x, blue = x, alpha = x },
+    --   text = "Status text ...",
+    --   showTimer = boolean
+    -- }
 
-    if self.recordingIndicator then
+    if not self.recordingIndicator then
+        self:createRecordingIndicator()
+    end
+
+    -- Update dot color and text
+    self:setStatus(config.text, config.dotColor)
+
+    -- Handle timer
+    if self.processingTimer then
+        self.processingTimer:stop()
+        self.processingTimer = nil
+    end
+
+    if config.showTimer then
         self.recordingIndicator[4].text = "00:00" -- Reset timer display
-
-        -- Stop recording timer if it exists
-        if self.processingTimer then
-            self.processingTimer:stop()
-        end
-
-        -- Start new processing timer
         self.processingStartTime = os.time()
         self.processingTimer = hs.timer.doEvery(1, function()
             if self.recordingIndicator then
@@ -132,34 +140,33 @@ function M:setProcessingStatus()
                 self.recordingIndicator[4].text = timeString
             end
         end)
+    else
+        self.recordingIndicator[4].text = ""
     end
 end
 
+function M:setRecordingStatus()
+    self:setIndicatorStatus({
+        dotColor = { red = 1, green = 0, blue = 0, alpha = 0.75 },
+        text = "Recording ...",
+        showTimer = true
+    })
+end
+
+function M:setProcessingStatus()
+    self:setIndicatorStatus({
+        dotColor = { red = 0, green = 0.5, blue = 1, alpha = 0.8 },
+        text = "Processing ...",
+        showTimer = true
+    })
+end
+
 function M:setPromptingStatus()
-    -- Change dot color to green for prompting
-    local promptingColor = { red = 0, green = 0.8, blue = 0, alpha = 0.8 }
-    self:setStatus("Prompting ...", promptingColor)
-
-    if self.recordingIndicator then
-        self.recordingIndicator[4].text = "00:00" -- Reset timer display
-
-        -- Stop recording timer if it exists
-        if self.processingTimer then
-            self.processingTimer:stop()
-        end
-
-        -- Start new processing timer
-        self.processingStartTime = os.time()
-        self.processingTimer = hs.timer.doEvery(1, function()
-            if self.recordingIndicator then
-                local elapsed = os.time() - self.processingStartTime
-                local minutes = math.floor(elapsed / 60)
-                local seconds = elapsed % 60
-                local timeString = string.format("%02d:%02d", minutes, seconds)
-                self.recordingIndicator[4].text = timeString
-            end
-        end)
-    end
+    self:setIndicatorStatus({
+        dotColor = { red = 0, green = 0.8, blue = 0, alpha = 0.8 },
+        text = "Prompting ...",
+        showTimer = true
+    })
 end
 
 function M:updateTimer()
