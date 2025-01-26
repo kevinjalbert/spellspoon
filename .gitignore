@@ -1,0 +1,8 @@
+# Environment variables
+.env
+
+# macOS system files
+.DS_Store
+
+# Hammerspoon generated files
+.hammerspoon/Spoons/whistion.spoon/*.log

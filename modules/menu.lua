@@ -189,11 +189,7 @@ function M:showMenu(transcript)
         local promptTemplate = self.prompts[choice.text]
         if promptTemplate then
             self.logger.d("Using prompt template: " .. promptTemplate)
-            local processedText = transcript  -- Just use the transcript directly
-            self.logger.d("Using transcript text: " .. processedText)
-            -- TODO: Send to processing/API
-            -- For now, just copy to clipboard
-            self:handleClipboardPaste(processedText)
+            self:processPromptWithTranscript(promptTemplate, transcript)
         end
 
         -- Clean up UI before handling the selection
@@ -239,6 +235,28 @@ function M:showMenu(transcript)
     -- Show the menu
     chooser:show()
     self.logger.d("Menu show command issued")
+end
+
+function M:processPromptWithTranscript(prompt, transcript)
+    self.logger.d("Processing prompt with transcript")
+    local scriptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
+
+    -- Replace the placeholder in the prompt with the transcript
+    local fullPrompt = prompt:gsub("{{TRANSCRIPT}}", transcript)
+
+    -- Create a task to process the prompt
+    local task = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
+        if exitCode == 0 and stdOut then
+            self.logger.d("Successfully processed prompt")
+            hs.pasteboard.setContents(stdOut)
+        else
+            self.logger.e("Failed to process prompt: " .. (stdErr or "unknown error"))
+        end
+    end)
+
+    -- Set the input and start the task
+    task:setInput(fullPrompt)
+    task:start()
 end
 
 return M

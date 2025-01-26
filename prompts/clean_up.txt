@@ -1,2 +1,3 @@
 Clean Up Text
-Please clean up and polish the following text, fixing any grammar, punctuation, and formatting issues while maintaining the original meaning: {{text}}
+Please clean up and polish the following text, fixing any grammar, punctuation, and formatting issues while maintaining the original meaning:
+{{TRANSCRIPT}}
