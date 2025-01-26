@@ -54,7 +54,7 @@ function M:startTranscription(callback)
         if exitCode == 0 and stdOut then
             self.logger.d("Starting post-transcription processing")
             -- Pass transcription output to the shell script for processing
-            local handleTask = hs.task.new(os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/handle_post_transcription.sh", function(handleExitCode, handleStdOut, handleStdErr)
+            local handleTask = hs.task.new(os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/handle_prompting.sh", function(handleExitCode, handleStdOut, handleStdErr)
                 self.logger.d("Post-transcription processing finished with exit code: " .. handleExitCode)
 
                 if handleExitCode == 0 and handleStdOut then
