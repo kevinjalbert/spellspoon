@@ -171,17 +171,19 @@ function M:showMenu(transcript)
     self:refreshMenuOptions() -- Refresh menu options before showing
     self.logger.d("Showing menu with transcript")
 
+    -- Clean up UI immediately when showing menu
+    if self.parent and self.parent.ui then
+        self.parent.ui:cleanup()
+    end
+
     -- Create a chooser with our menu options
     local chooser = hs.chooser.new(function(choice)
         self.logger.d("Menu choice made: " .. (choice and choice.text or "cancelled"))
         self:cleanup() -- Clean up menu-specific state
 
         if not choice then
-            -- User cancelled without selection, clean up UI
-            self.logger.d("Menu cancelled, cleaning up UI")
-            if self.parent and self.parent.ui then
-                self.parent.ui:cleanup()
-            end
+            -- User cancelled without selection
+            self.logger.d("Menu cancelled")
             return
         end
 
@@ -190,11 +192,6 @@ function M:showMenu(transcript)
         if promptTemplate then
             self.logger.d("Using prompt template: " .. promptTemplate)
             self:processPromptWithTranscript(promptTemplate, transcript)
-        end
-
-        -- Clean up UI before handling the selection
-        if self.parent and self.parent.ui then
-            self.parent.ui:cleanup()
         end
     end)
 
@@ -218,18 +215,6 @@ function M:showMenu(transcript)
         self.logger.d("Menu escape pressed")
         chooser:hide()
         self:cleanup()
-        -- Clean up the UI since we're cancelling
-        if self.parent and self.parent.ui then
-            self.parent.ui:cleanup()
-        end
-    end)
-
-    -- Set callback for when menu is actually shown
-    chooser:showCallback(function()
-        self.logger.d("Menu actually shown, cleaning up processing UI")
-        if self.parent and self.parent.ui then
-            self.parent.ui:cleanup()
-        end
     end)
 
     -- Show the menu
@@ -241,6 +226,12 @@ function M:processPromptWithTranscript(prompt, transcript)
     self.logger.d("Processing prompt with transcript")
     local scriptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
 
+    -- Show prompting UI state
+    if self.parent and self.parent.ui then
+        self.parent.ui:createRecordingIndicator()
+        self.parent.ui:setPromptingStatus()
+    end
+
     -- Replace the placeholder in the prompt with the transcript
     local fullPrompt = prompt:gsub("{{TRANSCRIPT}}", transcript)
 
@@ -251,6 +242,11 @@ function M:processPromptWithTranscript(prompt, transcript)
             hs.pasteboard.setContents(stdOut)
         else
             self.logger.e("Failed to process prompt: " .. (stdErr or "unknown error"))
+        end
+
+        -- Clean up UI after processing is complete
+        if self.parent and self.parent.ui then
+            self.parent.ui:cleanup()
         end
     end)
 
