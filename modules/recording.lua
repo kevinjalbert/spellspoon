@@ -34,11 +34,9 @@ end
 function M:stopRecording(interrupted)
     self.logger.d("Stopping recording" .. (interrupted and " (interrupted)" or ""))
 
-    -- Stop the recording task without cleanup
-    if self.recordingTask then
-        -- Just terminate the task, don't do any cleanup here
-        self.recordingTask:terminate()
-        self.recordingTask = nil
+    -- If there's no recording task, nothing to do
+    if not self.recordingTask then
+        return
     end
 
     -- Stop the timer without cleanup
@@ -48,7 +46,9 @@ function M:stopRecording(interrupted)
     end
 
     if interrupted then
-        -- If interrupted, clean up state and UI
+        -- If interrupted, terminate immediately and clean up
+        self.recordingTask:terminate()
+        self.recordingTask = nil
         self:cleanup()
         if self.parent and self.parent.ui then
             self.parent.ui:cleanup()
@@ -56,35 +56,64 @@ function M:stopRecording(interrupted)
         return
     end
 
-    -- Clean up recording-specific state but keep UI for processing
-    self.isRecording = false
-    if self.escHotkey then
-        self.escHotkey:delete()
-        self.escHotkey = nil
+    -- Update the modal to "Processing..." immediately
+    if self.parent and self.parent.ui then
+        self.parent.ui:setProcessingStatus()
     end
 
-    -- Update the modal to "Processing..."
-    self.parent.ui:setProcessingStatus()
+    -- Send SIGTERM to ffmpeg to gracefully stop recording
+    self.recordingTask:terminate()
 
-    -- Begin transcription and handle the result
-    self.parent.transcription:startTranscription(function(transcript, error)
-        self.logger.d("Transcription callback received: " .. (transcript and "success" or "error: " .. (error or "unknown")))
-
-        if error then
-            self.logger.e("Transcription error: " .. error)
-            -- Only clean up UI on error
-            if self.parent and self.parent.ui then
-                self.parent.ui:cleanup()
+    -- Wait for the recording process to fully complete
+    hs.timer.waitUntil(
+        -- Check condition
+        function()
+            -- Check both process completion and file existence
+            if self.recordingTask:isRunning() then
+                return false
             end
-            return
-        end
+            -- Check if the output file exists and is not empty
+            local file = io.open("/tmp/recorded_audio.wav", "rb")
+            if not file then
+                return false
+            end
+            -- Read a byte to ensure file is written
+            local byte = file:read(1)
+            file:close()
+            return byte ~= nil
+        end,
+        -- Callback when condition is met
+        function()
+            self.recordingTask = nil
+            self.isRecording = false
 
-        if transcript then
-            -- Show the menu with the processed transcript
-            -- UI cleanup will happen in the menu module when menu is shown
-            self.parent.menu:showMenu(transcript)
+            -- Clean up recording-specific state but keep UI for processing
+            if self.escHotkey then
+                self.escHotkey:delete()
+                self.escHotkey = nil
+            end
+
+            -- Begin transcription immediately once file is ready
+            self.parent.transcription:startTranscription(function(transcript, error)
+                self.logger.d("Transcription callback received: " .. (transcript and "success" or "error: " .. (error or "unknown")))
+
+                if error then
+                    self.logger.e("Transcription error: " .. error)
+                    -- Only clean up UI on error
+                    if self.parent and self.parent.ui then
+                        self.parent.ui:cleanup()
+                    end
+                    return
+                end
+
+                if transcript then
+                    -- Show the menu with the processed transcript
+                    -- UI cleanup will happen in the menu module when menu is shown
+                    self.parent.menu:showMenu(transcript)
+                end
+            end)
         end
-    end)
+    )
 end
 
 function M:startRecording()

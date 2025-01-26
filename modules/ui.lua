@@ -96,12 +96,25 @@ function M:createRecordingIndicator()
     self.recordingIndicator:show()
 end
 
-function M:setProcessingStatus()
+function M:setStatus(message, dotColor)
     if self.recordingIndicator then
-        -- Update modal to display "Processing..."
-        self.recordingIndicator[3].text = "Processing ..."
+        -- Update modal to display the message
+        self.recordingIndicator[3].text = message
+
+        -- Update dot color if provided
+        if dotColor then
+            self.recordingIndicator[2].fillColor = dotColor
+        end
+    end
+end
+
+function M:setProcessingStatus()
+    -- Change dot color to blue for processing
+    local processingColor = { red = 0, green = 0.5, blue = 1, alpha = 0.8 }
+    self:setStatus("Processing ...", processingColor)
+
+    if self.recordingIndicator then
         self.recordingIndicator[4].text = "00:00" -- Reset timer display
-        self.recordingIndicator[2].fillColor = { red = 0, green = 0.5, blue = 1, alpha = 0.8 } -- Change dot color to blue
 
         -- Stop recording timer if it exists
         if self.processingTimer then
