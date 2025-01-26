@@ -36,21 +36,31 @@ function M:refreshMenuOptions()
 
     local promptsDir = hs.spoons.scriptPath() .. "../prompts"
     local iter, dir_obj = hs.fs.dir(promptsDir)
+    local files = {}
 
+    -- First collect all filenames
     if iter then
         for file in iter, dir_obj do
             if file:match("%.txt$") then
-                local promptData = self:readPromptFile(promptsDir .. "/" .. file)
-                if promptData then
-                    table.insert(self.menuChoices, {
-                        text = promptData.title,
-                        subText = ""  -- Empty string for no subtext
-                    })
-                    self.prompts[promptData.title] = promptData.prompt
-                end
+                table.insert(files, file)
             end
         end
         dir_obj:close()
+    end
+
+    -- Sort filenames alphanumerically
+    table.sort(files)
+
+    -- Process files in sorted order
+    for _, file in ipairs(files) do
+        local promptData = self:readPromptFile(promptsDir .. "/" .. file)
+        if promptData then
+            table.insert(self.menuChoices, {
+                text = promptData.title,
+                subText = ""  -- Empty string for no subtext
+            })
+            self.prompts[promptData.title] = promptData.prompt
+        end
     end
 end
 
