@@ -1,13 +1,58 @@
 local M = {}
 
 -- Menu state
-M.menuChoices = {
-    { text = "Menu Option 1", subText = "Description for option 1" },
-    { text = "Menu Option 2", subText = "Description for option 2" },
-    { text = "Menu Option 3", subText = "Description for option 3" }
-}
-
+M.menuChoices = {}
+M.prompts = {}
 M.escHotkey = nil
+
+-- Function to read and parse a prompt file
+function M:readPromptFile(filename)
+    self.logger.d("Reading prompt file: " .. filename)
+    local file = io.open(filename, "r")
+    if not file then
+        self.logger.w("Failed to open prompt file: " .. filename)
+        return nil
+    end
+
+    local title = file:read("*line")
+    local prompt = file:read("*all")
+    file:close()
+
+    if title and prompt then
+        self.logger.d("Loaded prompt file " .. filename .. ":\nTitle: " .. title .. "\nPrompt: " .. prompt)
+        return {
+            title = title,
+            prompt = prompt:gsub("^%s+", ""):gsub("%s+$", "") -- Trim whitespace
+        }
+    end
+    self.logger.w("Invalid prompt file format: " .. filename)
+    return nil
+end
+
+-- Function to refresh menu options based on available prompt files
+function M:refreshMenuOptions()
+    self.menuChoices = {}
+    self.prompts = {}
+
+    local promptsDir = hs.spoons.scriptPath() .. "../prompts"
+    local iter, dir_obj = hs.fs.dir(promptsDir)
+
+    if iter then
+        for file in iter, dir_obj do
+            if file:match("%.txt$") then
+                local promptData = self:readPromptFile(promptsDir .. "/" .. file)
+                if promptData then
+                    table.insert(self.menuChoices, {
+                        text = promptData.title,
+                        subText = ""  -- Empty string for no subtext
+                    })
+                    self.prompts[promptData.title] = promptData.prompt
+                end
+            end
+        end
+        dir_obj:close()
+    end
+end
 
 -- Fuzzy finding helper functions
 function M:fuzzyMatch(str, pattern)
@@ -123,6 +168,7 @@ function M:cleanup()
 end
 
 function M:showMenu(transcript)
+    self:refreshMenuOptions() -- Refresh menu options before showing
     self.logger.d("Showing menu with transcript")
 
     -- Create a chooser with our menu options
@@ -139,17 +185,21 @@ function M:showMenu(transcript)
             return
         end
 
-        -- TODO: Handle the selected choice
-        self.logger.d("Selected menu option: " .. choice.text)
-        -- Here we'll eventually handle different prompt files
+        -- Get the prompt template and replace the placeholder
+        local promptTemplate = self.prompts[choice.text]
+        if promptTemplate then
+            self.logger.d("Using prompt template: " .. promptTemplate)
+            local processedText = transcript  -- Just use the transcript directly
+            self.logger.d("Using transcript text: " .. processedText)
+            -- TODO: Send to processing/API
+            -- For now, just copy to clipboard
+            self:handleClipboardPaste(processedText)
+        end
 
         -- Clean up UI before handling the selection
         if self.parent and self.parent.ui then
             self.parent.ui:cleanup()
         end
-
-        -- For now, just paste the transcript after menu selection
-        self:handleClipboardPaste(transcript)
     end)
 
     -- Style the chooser to match the recording indicator
@@ -189,12 +239,6 @@ function M:showMenu(transcript)
     -- Show the menu
     chooser:show()
     self.logger.d("Menu show command issued")
-end
-
--- Function to refresh menu options based on available prompt files
-function M:refreshMenuOptions()
-    -- TODO: Implement scanning for prompt files and updating menuChoices
-    -- For now, we're using static options
 end
 
 return M

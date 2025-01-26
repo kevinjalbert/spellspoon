@@ -1,0 +1,2 @@
+Summarize Text
+Create a concise summary of the following text, capturing the main points and key ideas: {{text}}

@@ -1,0 +1,2 @@
+Convert to Bullet Points
+Transform the following text into clear, organized bullet points, highlighting the key information and maintaining a logical flow: {{text}}
