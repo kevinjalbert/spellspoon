@@ -43,16 +43,19 @@ package.path = spoonPath .. "modules/?.lua;" .. package.path
 obj.recording = require("recording")
 obj.ui = require("ui")
 obj.transcription = require("transcription")
+obj.menu = require("menu")
 
 -- Set up parent references
 obj.recording.parent = obj
 obj.ui.parent = obj
 obj.transcription.parent = obj
+obj.menu.parent = obj
 
 -- Share logger with modules
 obj.recording.logger = obj.logger
 obj.ui.logger = obj.logger
 obj.transcription.logger = obj.logger
+obj.menu.logger = obj.logger
 
 function obj:whiston()
     if not self.recording.isRecording then

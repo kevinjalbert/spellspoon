@@ -2,6 +2,7 @@ local M = {}
 
 M.recordingIndicator = nil
 M.pulseTimer = nil
+M.processingTimer = nil
 
 function M:createRecordingIndicator()
     local screen = hs.screen.primaryScreen()
@@ -101,6 +102,23 @@ function M:setProcessingStatus()
         self.recordingIndicator[3].text = "Processing ..."
         self.recordingIndicator[4].text = "00:00" -- Reset timer display
         self.recordingIndicator[2].fillColor = { red = 0, green = 0.5, blue = 1, alpha = 0.8 } -- Change dot color to blue
+
+        -- Stop recording timer if it exists
+        if self.processingTimer then
+            self.processingTimer:stop()
+        end
+
+        -- Start new processing timer
+        self.processingStartTime = os.time()
+        self.processingTimer = hs.timer.doEvery(1, function()
+            if self.recordingIndicator then
+                local elapsed = os.time() - self.processingStartTime
+                local minutes = math.floor(elapsed / 60)
+                local seconds = elapsed % 60
+                local timeString = string.format("%02d:%02d", minutes, seconds)
+                self.recordingIndicator[4].text = timeString
+            end
+        end)
     end
 end
 
@@ -112,6 +130,24 @@ function M:updateTimer()
         local timeString = string.format("%02d:%02d", minutes, seconds)
 
         self.recordingIndicator[4].text = timeString
+    end
+end
+
+function M:cleanup()
+    -- Stop all timers
+    if self.pulseTimer then
+        self.pulseTimer:stop()
+        self.pulseTimer = nil
+    end
+    if self.processingTimer then
+        self.processingTimer:stop()
+        self.processingTimer = nil
+    end
+
+    -- Clean up the indicator
+    if self.recordingIndicator then
+        self.recordingIndicator:delete()
+        self.recordingIndicator = nil
     end
 end
 
