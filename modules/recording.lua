@@ -45,9 +45,12 @@ function M:startRecording()
     if not self.isRecording then
         -- Start recording
         self.logger.d("Starting recording")
-        self.recordingTask = hs.task.new("/opt/homebrew/bin/ffmpeg", nil, {
-            "-y", "-f", "avfoundation", "-i", ":4", "-ar", "16000", "-ac", "1", "/tmp/recorded_audio.wav"
-        })
+        local scriptPath = os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/handle_recording.sh"
+        self.recordingTask = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
+            if exitCode ~= 0 then
+                self.logger.e("Recording failed: " .. (stdErr or "unknown error"))
+            end
+        end)
         self.recordingTask:start()
         self.isRecording = true
 

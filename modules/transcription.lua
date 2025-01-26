@@ -3,7 +3,8 @@ local M = {}
 function M:startTranscription()
     -- Begin transcription after a short delay
     hs.timer.doAfter(0.25, function()
-        local transcribeTask = hs.task.new("/opt/homebrew/bin/whisper-cli", function(exitCode, stdOut, stdErr)
+        local scriptPath = os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/handle_transcription.sh"
+        local transcribeTask = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
             if self.parent.ui.recordingIndicator then
                 self.parent.ui.recordingIndicator:delete() -- Clean up the modal after processing
                 self.parent.ui.recordingIndicator = nil
@@ -40,11 +41,7 @@ function M:startTranscription()
             else
                 self.logger.e("Transcription failed: " .. (stdErr or "unknown error"))
             end
-        end, {
-            "--no-prints", "--no-timestamps",
-            "--model", os.getenv("HOME") .. "/Downloads/ggml-large-v3-turbo-q5_0.bin",
-            "-f", "/tmp/recorded_audio.wav"
-        })
+        end)
         transcribeTask:start()
     end)
 end
