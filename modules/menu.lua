@@ -247,20 +247,16 @@ function M:processPromptWithTranscript(prompt, transcript)
 
     -- Create a task to process the prompt
     local task = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
-        if exitCode == 0 and stdOut then
-            self.logger.d("Successfully processed prompt")
-            hs.pasteboard.setContents(stdOut)
-        else
-            self.logger.e("Failed to process prompt: " .. (stdErr or "unknown error"))
-        end
-
         -- Clean up UI after processing is complete
         if self.parent and self.parent.ui then
             self.parent.ui:cleanup()
         end
-    end)
 
-    -- Set the input and start the task
+        if exitCode == 0 and stdOut then
+            -- Handle clipboard paste just like in direct mode
+            self:handleClipboardPaste(stdOut)
+        end
+    end)
     task:setInput(fullPrompt)
     task:start()
 end
