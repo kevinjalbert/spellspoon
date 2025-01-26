@@ -65,9 +65,18 @@ function obj:whiston()
     end
 end
 
+function obj:whistonDirect()
+    if not self.recording.isRecording then
+        self.recording:startRecording(true)  -- Pass true for direct mode
+    else
+        self.recording:stopRecording(false, true)  -- Not interrupted, but direct mode
+    end
+end
+
 function obj:bindHotkeys(mapping)
     local def = {
-        whiston = {{"cmd", "alt", "ctrl"}, "w"}
+        whiston = {{"cmd", "alt", "ctrl"}, "w"},
+        whistonDirect = {{"cmd", "alt", "ctrl"}, "e"}
     }
     if mapping then
         for k,v in pairs(mapping) do
@@ -77,7 +86,11 @@ function obj:bindHotkeys(mapping)
 
     for k,v in pairs(def) do
         if v[1] and v[2] then
-            hs.hotkey.bind(v[1], v[2], function() self:whiston() end)
+            if k == "whiston" then
+                hs.hotkey.bind(v[1], v[2], function() self:whiston() end)
+            elseif k == "whistonDirect" then
+                hs.hotkey.bind(v[1], v[2], function() self:whistonDirect() end)
+            end
         end
     end
 end

@@ -6,6 +6,7 @@ M.recordingTask = nil
 M.recordingTimer = nil
 M.startTime = nil
 M.escHotkey = nil
+M.isDirect = false
 
 function M:cleanup()
     -- Stop recording task if it exists
@@ -31,8 +32,8 @@ function M:cleanup()
     self.startTime = nil
 end
 
-function M:stopRecording(interrupted)
-    self.logger.d("Stopping recording" .. (interrupted and " (interrupted)" or ""))
+function M:stopRecording(interrupted, direct)
+    self.logger.d("Stopping recording" .. (interrupted and " (interrupted)" or "") .. (direct and " (direct)" or ""))
 
     -- If there's no recording task, nothing to do
     if not self.recordingTask then
@@ -107,16 +108,45 @@ function M:stopRecording(interrupted)
                 end
 
                 if transcript then
-                    -- Show the menu with the processed transcript
-                    -- UI cleanup will happen in the menu module when menu is shown
-                    self.parent.menu:showMenu(transcript)
+                    if direct then
+                        -- For direct prompting, use the first available prompt
+                        self.parent.menu:refreshMenuOptions()
+                        if #self.parent.menu.menuChoices > 0 then
+                            local firstPrompt = self.parent.menu.prompts[self.parent.menu.menuChoices[1].text]
+                            if firstPrompt then
+                                -- Show prompting UI state
+                                if self.parent and self.parent.ui then
+                                    self.parent.ui:setPromptingStatus()
+                                end
+                                -- Process prompt and clean up UI afterward
+                                local scriptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
+                                local fullPrompt = firstPrompt:gsub("{{TRANSCRIPT}}", transcript)
+                                local task = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
+                                    -- Clean up UI after processing is complete
+                                    if self.parent and self.parent.ui then
+                                        self.parent.ui:cleanup()
+                                    end
+
+                                    if exitCode == 0 and stdOut then
+                                        self.parent.menu:handleClipboardPaste(stdOut)
+                                    end
+                                end)
+                                task:setInput(fullPrompt)
+                                task:start()
+                            end
+                        end
+                    else
+                        -- Show the menu with the processed transcript
+                        -- UI cleanup will happen in the menu module when menu is shown
+                        self.parent.menu:showMenu(transcript)
+                    end
                 end
             end)
         end
     )
 end
 
-function M:startRecording()
+function M:startRecording(direct)
     if not self.isRecording then
         -- Start recording
         self.logger.d("Starting recording")
@@ -129,6 +159,7 @@ function M:startRecording()
         end)
         self.recordingTask:start()
         self.isRecording = true
+        self.isDirect = direct -- Store the direct flag
 
         -- Show recording indicator
         self.parent.ui:createRecordingIndicator()
@@ -144,7 +175,7 @@ function M:startRecording()
         end)
     else
         -- Stop recording and process transcription
-        self:stopRecording(false) -- Not interrupted
+        self:stopRecording(false, self.isDirect) -- Pass through the direct flag
     end
 end
 
