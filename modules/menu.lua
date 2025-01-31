@@ -224,6 +224,7 @@ function M:showMenu(transcript)
     self.escHotkey = hs.hotkey.bind({}, "escape", function()
         self.logger.d("Menu escape pressed")
         chooser:hide()
+        self.escHotkey:delete()
     end)
 
     -- Show the menu

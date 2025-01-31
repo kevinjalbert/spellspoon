@@ -29,9 +29,21 @@ function M:cleanup()
     if self.parent and self.parent.ui then
         self.parent.ui:cleanup()
     end
+
+    -- Clean up hotkeys
+    if self.escHotkey then
+        self.escHotkey:delete()
+        self.escHotkey = nil
+    end
 end
 
 function M:stopRecording(interrupted, direct)
+    -- Clean up hotkeys (we used esc to get here)
+    if self.escHotkey then
+        self.escHotkey:delete()
+        self.escHotkey = nil
+    end
+
     self.logger.d("Stopping recording" .. (interrupted and " (interrupted)" or "") .. (direct and " (direct)" or ""))
 
     -- If there's no recording task, nothing to do

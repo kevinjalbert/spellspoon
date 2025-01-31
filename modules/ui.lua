@@ -197,12 +197,6 @@ function M:cleanup()
         self.recordingIndicator:delete()
         self.recordingIndicator = nil
     end
-
-    -- Clean up hotkeys
-    if self.escHotkey then
-        self.escHotkey:delete()
-        self.escHotkey = nil
-    end
 end
 
 return M
