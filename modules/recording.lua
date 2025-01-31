@@ -21,15 +21,14 @@ function M:cleanup()
         self.recordingTimer = nil
     end
 
-    -- Clean up escape hotkey
-    if self.escHotkey then
-        self.escHotkey:delete()
-        self.escHotkey = nil
-    end
-
     -- Reset recording state
     self.isRecording = false
     self.startTime = nil
+
+    -- Clean up UI
+    if self.parent and self.parent.ui then
+        self.parent.ui:cleanup()
+    end
 end
 
 function M:stopRecording(interrupted, direct)
@@ -40,20 +39,11 @@ function M:stopRecording(interrupted, direct)
         return
     end
 
-    -- Stop the timer without cleanup
-    if self.recordingTimer then
-        self.recordingTimer:stop()
-        self.recordingTimer = nil
-    end
-
     if interrupted then
         -- If interrupted, terminate immediately and clean up
         self.recordingTask:terminate()
         self.recordingTask = nil
         self:cleanup()
-        if self.parent and self.parent.ui then
-            self.parent.ui:cleanup()
-        end
         return
     end
 
@@ -87,12 +77,6 @@ function M:stopRecording(interrupted, direct)
         function()
             self.recordingTask = nil
             self.isRecording = false
-
-            -- Clean up recording-specific state but keep UI for processing
-            if self.escHotkey then
-                self.escHotkey:delete()
-                self.escHotkey = nil
-            end
 
             -- Begin transcription immediately once file is ready
             self.parent.transcription:startTranscription(function(transcript, error)
@@ -163,8 +147,7 @@ function M:startRecording(direct)
 
         -- Show recording indicator
         self.parent.ui:createRecordingIndicator()
-        self.startTime = os.time()
-        self.recordingTimer = hs.timer.doEvery(1, function() self.parent.ui:updateTimer() end)
+        self.parent.ui:setRecordingStatus()
 
         -- Bind 'Esc' key to stop recording without transcription
         if self.escHotkey then

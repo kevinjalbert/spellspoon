@@ -171,9 +171,9 @@ function M:handleClipboardPaste(text)
 end
 
 function M:cleanup()
-    if self.escHotkey then
-        self.escHotkey:delete()
-        self.escHotkey = nil
+    -- Clean up UI
+    if self.parent and self.parent.ui then
+        self.parent.ui:cleanup()
     end
 end
 
@@ -189,7 +189,7 @@ function M:showMenu(transcript)
     -- Create a chooser with our menu options
     local chooser = hs.chooser.new(function(choice)
         self.logger.d("Menu choice made: " .. (choice and choice.text or "cancelled"))
-        self:cleanup() -- Clean up menu-specific state
+        -- Clean up menu-specific state
 
         if not choice then
             -- User cancelled without selection
@@ -224,7 +224,6 @@ function M:showMenu(transcript)
     self.escHotkey = hs.hotkey.bind({}, "escape", function()
         self.logger.d("Menu escape pressed")
         chooser:hide()
-        self:cleanup()
     end)
 
     -- Show the menu

@@ -181,6 +181,7 @@ function M:updateTimer()
 end
 
 function M:cleanup()
+    self.logger.d("UI cleanup function called")
     -- Stop all timers
     if self.pulseTimer then
         self.pulseTimer:stop()
@@ -195,6 +196,12 @@ function M:cleanup()
     if self.recordingIndicator then
         self.recordingIndicator:delete()
         self.recordingIndicator = nil
+    end
+
+    -- Clean up hotkeys
+    if self.escHotkey then
+        self.escHotkey:delete()
+        self.escHotkey = nil
     end
 end
 

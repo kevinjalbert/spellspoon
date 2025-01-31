@@ -35,6 +35,7 @@ obj.license = "MIT - https://opensource.org/licenses/MIT"
 
 -- Initialize logger
 obj.logger = hs.logger.new('Whiston')
+obj.logger.setLogLevel('debug')  -- Set log level to debug to see all logs
 
 -- Load modules from the Spoon's modules directory
 local spoonPath = debug.getinfo(1, "S").source:sub(2):match("(.*/)")
