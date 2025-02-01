@@ -61,7 +61,7 @@ function M:stopRecording(interrupted, direct)
 
     -- Update the modal to "Processing..." immediately
     if self.parent and self.parent.ui then
-        self.parent.ui:setProcessingStatus()
+        self.parent.ui:setTranscribingStatus()
     end
 
     -- Send SIGTERM to ffmpeg to gracefully stop recording

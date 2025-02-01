@@ -147,23 +147,23 @@ end
 
 function M:setRecordingStatus()
     self:setIndicatorStatus({
-        dotColor = { red = 1, green = 0, blue = 0, alpha = 0.75 },
+        dotColor = { red = 1, green = 0, blue = 0, alpha = 0.8 },
         text = "Recording ...",
         showTimer = true
     })
 end
 
-function M:setProcessingStatus()
+function M:setTranscribingStatus()
     self:setIndicatorStatus({
-        dotColor = { red = 0, green = 0.5, blue = 1, alpha = 0.8 },
-        text = "Processing ...",
+        dotColor = { red = 0, green = 0, blue = 1, alpha = 0.8 },
+        text = "Transcribing ...",
         showTimer = true
     })
 end
 
 function M:setPromptingStatus()
     self:setIndicatorStatus({
-        dotColor = { red = 0, green = 0.8, blue = 0, alpha = 0.8 },
+        dotColor = { red = 0, green = 1, blue = 0, alpha = 0.8 },
         text = "Prompting ...",
         showTimer = true
     })
