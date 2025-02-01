@@ -74,10 +74,24 @@ function obj:whistonDirect()
     end
 end
 
+function obj:whistonMenu()
+    -- Get the currently focused element
+    local element = hs.uielement.focusedElement()
+    if element then
+        -- Get selected text directly from the element
+        local selectedText = element:selectedText()
+        if selectedText then
+            -- Show menu directly with the selected text
+            self.menu:showMenu(selectedText)
+        end
+    end
+end
+
 function obj:bindHotkeys(mapping)
     local def = {
         whiston = {{"cmd", "alt", "ctrl"}, "w"},
-        whistonDirect = {{"cmd", "alt", "ctrl"}, "e"}
+        whistonDirect = {{"cmd", "alt", "ctrl"}, "e"},
+        whistonMenu = {{"cmd", "alt", "ctrl", "shift"}, "="}
     }
     if mapping then
         for k,v in pairs(mapping) do
@@ -91,6 +105,8 @@ function obj:bindHotkeys(mapping)
                 hs.hotkey.bind(v[1], v[2], function() self:whiston() end)
             elseif k == "whistonDirect" then
                 hs.hotkey.bind(v[1], v[2], function() self:whistonDirect() end)
+            elseif k == "whistonMenu" then
+                hs.hotkey.bind(v[1], v[2], function() self:whistonMenu() end)
             end
         end
     end
