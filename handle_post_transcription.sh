@@ -9,7 +9,7 @@ trimmed=$(echo "$input" | tr -d '\r' | awk 'NF { gsub(/^[ \t]+|[ \t]+$/, ""); pr
 # Log transcription statistics to SQLite database
 log_transcription_stats() {
     local trimmed="$1"
-    local db_file="transcription_stats.db"
+    local db_file="$HOME/.hammerspoon/Spoons/whistion.spoon/transcription_stats.sqlite"
 
     # Get character and word counts from trimmed output
     local char_count=${#trimmed}

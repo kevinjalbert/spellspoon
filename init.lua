@@ -45,20 +45,24 @@ obj.recording = require("recording")
 obj.ui = require("ui")
 obj.transcription = require("transcription")
 obj.menu = require("menu")
+obj.statistics = require("statistics")
 
 -- Set up parent references
 obj.recording.parent = obj
 obj.ui.parent = obj
 obj.transcription.parent = obj
 obj.menu.parent = obj
+obj.statistics.parent = obj
 
 -- Share logger with modules
 obj.recording.logger = obj.logger
 obj.ui.logger = obj.logger
 obj.transcription.logger = obj.logger
 obj.menu.logger = obj.logger
+obj.statistics.logger = obj.logger
 
 function obj:whiston()
+    self.ui:cleanup()
     if not self.recording.isRecording then
         self.recording:startRecording()
     else
@@ -67,6 +71,7 @@ function obj:whiston()
 end
 
 function obj:whistonDirect()
+    self.ui:cleanup()
     if not self.recording.isRecording then
         self.recording:startRecording(true)  -- Pass true for direct mode
     else
@@ -75,6 +80,7 @@ function obj:whistonDirect()
 end
 
 function obj:whistonMenu()
+    self.ui:cleanup()
     -- Get the currently focused element
     local element = hs.uielement.focusedElement()
     if element then
@@ -87,11 +93,16 @@ function obj:whistonMenu()
     end
 end
 
+function obj:toggleStats()
+    self.ui:toggleStatsModal()
+end
+
 function obj:bindHotkeys(mapping)
     local def = {
         whiston = {{"cmd", "alt", "ctrl"}, "w"},
         whistonDirect = {{"cmd", "alt", "ctrl"}, "e"},
-        whistonMenu = {{"cmd", "alt", "ctrl", "shift"}, "="}
+        whistonMenu = {{"cmd", "alt", "ctrl", "shift"}, "="},
+        toggleStats = {{"cmd", "alt", "ctrl", "shift"}, "-"}
     }
     if mapping then
         for k,v in pairs(mapping) do
@@ -107,6 +118,8 @@ function obj:bindHotkeys(mapping)
                 hs.hotkey.bind(v[1], v[2], function() self:whistonDirect() end)
             elseif k == "whistonMenu" then
                 hs.hotkey.bind(v[1], v[2], function() self:whistonMenu() end)
+            elseif k == "toggleStats" then
+                hs.hotkey.bind(v[1], v[2], function() self:toggleStats() end)
             end
         end
     end
