@@ -1,4 +1,5 @@
 local M = {}
+local prompt_processor = require("prompt_processor")
 
 -- Recording state
 M.isRecording = false
@@ -108,28 +109,24 @@ function M:stopRecording(interrupted, direct)
                         -- For direct prompting, use the first available prompt
                         self.parent.menu:refreshMenuOptions()
                         if #self.parent.menu.menuChoices > 0 then
-                            local firstPrompt = self.parent.menu.prompts[self.parent.menu.menuChoices[1].text]
-                            if firstPrompt then
-                                -- Show prompting UI state
-                                if self.parent and self.parent.ui then
-                                    self.parent.ui:setPromptingStatus()
-                                end
-                                -- Process prompt and clean up UI afterward
-                                local scriptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
-                                local fullPrompt = firstPrompt:gsub("{{TRANSCRIPT}}", transcript)
-                                local task = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
-                                    -- Clean up UI after processing is complete
+                            local firstPromptScriptPath = self.parent.menu.prompts[self.parent.menu.menuChoices[1].text]
+                            if firstPromptScriptPath then
+                                -- Get the prompt script path and process with transcript
+                                if firstPromptScriptPath then
+                                    self.logger.d("Using prompt script: " .. firstPromptScriptPath)
+
                                     if self.parent and self.parent.ui then
                                         self.parent.ui:cleanup()
                                     end
 
-                                    if exitCode == 0 and stdOut then
-                                        self.parent.menu:handleClipboardPaste(stdOut)
-                                    end
-                                end)
-                                task:setInput(fullPrompt)
-                                task:start()
+                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.logger, self.parent and self.parent.ui)
+                                else
+                                    self.logger.e("Failed to get prompt script path for first prompt")
+                                end
                             end
+                        else
+                            -- Log error if no prompts are available
+                            self.logger.e("No prompts available")
                         end
                     else
                         -- Show the menu with the processed transcript
