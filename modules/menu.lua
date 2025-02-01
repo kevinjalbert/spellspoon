@@ -1,33 +1,12 @@
 local M = {}
+local fuzzy_matcher = require("fuzzy_matcher")
+local prompt_reader = require("prompt_reader")
+local prompt_processor = require("prompt_processor")
 
 -- Menu state
 M.menuChoices = {}
 M.prompts = {}
 M.escHotkey = nil
-
--- Function to read and parse a prompt file
-function M:readPromptFile(filename)
-    self.logger.d("Reading prompt file: " .. filename)
-    local file = io.open(filename, "r")
-    if not file then
-        self.logger.w("Failed to open prompt file: " .. filename)
-        return nil
-    end
-
-    local title = file:read("*line")
-    local prompt = file:read("*all")
-    file:close()
-
-    if title and prompt then
-        self.logger.d("Loaded prompt file " .. filename .. ":\nTitle: " .. title .. "\nPrompt: " .. prompt)
-        return {
-            title = title,
-            prompt = prompt:gsub("^%s+", ""):gsub("%s+$", "") -- Trim whitespace
-        }
-    end
-    self.logger.w("Invalid prompt file format: " .. filename)
-    return nil
-end
 
 -- Function to refresh menu options based on available prompt files
 function M:refreshMenuOptions()
@@ -53,7 +32,7 @@ function M:refreshMenuOptions()
 
     -- Process files in sorted order
     for _, file in ipairs(files) do
-        local promptData = self:readPromptFile(promptsDir .. "/" .. file)
+        local promptData = prompt_reader:readPromptFile(promptsDir .. "/" .. file, self.logger)
         if promptData then
             table.insert(self.menuChoices, {
                 text = promptData.title,
@@ -64,116 +43,20 @@ function M:refreshMenuOptions()
     end
 end
 
--- Fuzzy finding helper functions
-function M:fuzzyMatch(str, pattern)
-    -- Convert to lowercase for case-insensitive matching
-    str = str:lower()
-    pattern = pattern:lower()
-
-    local score = 0
-    local currentPos = 1
-    local consecutiveMatches = 0
-    local lastMatchIndex = 0
-
-    -- Match each character in the pattern
-    for i = 1, #pattern do
-        local c = pattern:sub(i,i)
-        local found = false
-
-        -- Look for the character in the remaining string
-        for j = currentPos, #str do
-            if str:sub(j,j) == c then
-                -- Found a match
-                found = true
-                currentPos = j + 1
-
-                -- Increase score based on match quality
-                if lastMatchIndex and j == lastMatchIndex + 1 then
-                    -- Consecutive matches are worth more
-                    consecutiveMatches = consecutiveMatches + 1
-                    score = score + (consecutiveMatches * 2)
-                else
-                    consecutiveMatches = 1
-                    score = score + 1
-                end
-
-                -- Bonus for matching at start of word
-                if j == 1 or str:sub(j-1,j-1) == " " then
-                    score = score + 3
-                end
-
-                lastMatchIndex = j
-                break
-            end
-        end
-
-        if not found then
-            return 0
-        end
-    end
-
-    -- Bonus for matching higher percentage of the string
-    score = score * (pattern:len() / str:len())
-
-    return score
-end
-
-function M:filterChoices(choices, query)
-    if not query or query == "" then
-        return choices
-    end
-
-    local results = {}
-    for _, choice in ipairs(choices) do
-        local textScore = self:fuzzyMatch(choice.text, query)
-        local subTextScore = self:fuzzyMatch(choice.subText, query)
-        local score = math.max(textScore, subTextScore)
-
-        if score > 0 then
-            table.insert(results, {
-                text = choice.text,
-                subText = choice.subText,
-                score = score
-            })
-        end
-    end
-
-    -- Sort by score
-    table.sort(results, function(a, b) return a.score > b.score end)
-
-    -- Remove scores before returning
-    for _, result in ipairs(results) do
-        result.score = nil
-    end
-
-    return results
-end
-
-function M:handleClipboardPaste(text)
-    hs.pasteboard.setContents(text) -- Store processed transcription in clipboard
-
-    -- Check if there's an active text field before attempting to paste
-    local focused = hs.uielement.focusedElement()
-    local shouldPaste = false
-
-    if focused then
-        local success, role = pcall(function() return focused:role() end)
-        if success and role then
-            shouldPaste = (role == "AXTextField" or role == "AXTextArea")
-        end
-    end
-
-    if shouldPaste then
-        hs.eventtap.keyStroke({"cmd"}, "v")
-    else
-        hs.alert.show("Transcription copied to clipboard")
-    end
-end
-
 function M:cleanup()
     -- Clean up UI
     if self.parent and self.parent.ui then
         self.parent.ui:cleanup()
+    end
+end
+
+function M:handleClipboardPaste(text)
+    if text then
+        -- Copy the text to the clipboard
+        hs.pasteboard.setContents(text)
+
+        -- Simulate cmd+v to paste
+        hs.eventtap.keyStroke({"cmd"}, "v")
     end
 end
 
@@ -201,7 +84,7 @@ function M:showMenu(transcript)
         local promptTemplate = self.prompts[choice.text]
         if promptTemplate then
             self.logger.d("Using prompt template: " .. promptTemplate)
-            self:processPromptWithTranscript(promptTemplate, transcript)
+            prompt_processor:processPromptWithTranscript(promptTemplate, transcript, self.logger, self.parent and self.parent.ui)
         end
     end)
 
@@ -212,7 +95,7 @@ function M:showMenu(transcript)
 
     -- Configure the chooser with custom fuzzy finding
     chooser:queryChangedCallback(function(query)
-        chooser:choices(self:filterChoices(self.menuChoices, query))
+        chooser:choices(fuzzy_matcher:filterChoices(self.menuChoices, query))
     end)
 
     chooser:choices(self.menuChoices)
@@ -230,35 +113,6 @@ function M:showMenu(transcript)
     -- Show the menu
     chooser:show()
     self.logger.d("Menu show command issued")
-end
-
-function M:processPromptWithTranscript(prompt, transcript)
-    self.logger.d("Processing prompt with transcript")
-    local scriptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
-
-    -- Show prompting UI state
-    if self.parent and self.parent.ui then
-        self.parent.ui:createRecordingIndicator()
-        self.parent.ui:setPromptingStatus()
-    end
-
-    -- Replace the placeholder in the prompt with the transcript
-    local fullPrompt = prompt:gsub("{{TRANSCRIPT}}", transcript)
-
-    -- Create a task to process the prompt
-    local task = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
-        -- Clean up UI after processing is complete
-        if self.parent and self.parent.ui then
-            self.parent.ui:cleanup()
-        end
-
-        if exitCode == 0 and stdOut then
-            -- Handle clipboard paste just like in direct mode
-            self:handleClipboardPaste(stdOut)
-        end
-    end)
-    task:setInput(fullPrompt)
-    task:start()
 end
 
 return M
