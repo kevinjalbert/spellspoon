@@ -1,9 +1,8 @@
 local M = {}
-local prompt_reader = require("prompt_reader")
 
-function M:processPromptWithTranscript(prompt, transcript, logger, ui)
+function M:processPromptWithTranscript(scriptPath, transcript, logger, ui)
     logger.d("Processing prompt with transcript")
-    local scriptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
+    local processPromptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
 
     -- Show prompting UI state
     if ui then
@@ -11,11 +10,25 @@ function M:processPromptWithTranscript(prompt, transcript, logger, ui)
         ui:setPromptingStatus()
     end
 
-    -- Replace the placeholder in the prompt with the transcript
-    local fullPrompt = prompt:gsub("{{TRANSCRIPT}}", transcript)
+    -- First execute the prompt script to get the full prompt
+    local promptHandle = io.popen("echo '" .. transcript:gsub("'", "'\\''") .. "' | " .. scriptPath .. " 2>/dev/null")
+    if not promptHandle then
+        logger.w("Failed to execute prompt script: " .. scriptPath)
+        if ui then ui:cleanup() end
+        return
+    end
+
+    local fullPrompt = promptHandle:read("*a")
+    promptHandle:close()
+
+    if not fullPrompt then
+        logger.w("Failed to get prompt from script: " .. scriptPath)
+        if ui then ui:cleanup() end
+        return
+    end
 
     -- Create a task to process the prompt
-    local task = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
+    local task = hs.task.new(processPromptPath, function(exitCode, stdOut, stdErr)
         -- Clean up UI after processing is complete
         if ui then
             ui:cleanup()

@@ -20,7 +20,7 @@ function M:refreshMenuOptions()
     -- First collect all filenames
     if iter then
         for file in iter, dir_obj do
-            if file:match("%.txt$") then
+            if file:match("%.sh$") then
                 table.insert(files, file)
             end
         end
@@ -38,7 +38,7 @@ function M:refreshMenuOptions()
                 text = promptData.title,
                 subText = ""  -- Empty string for no subtext
             })
-            self.prompts[promptData.title] = promptData.prompt
+            self.prompts[promptData.title] = promptData.path  -- Store the script path instead of prompt content
         end
     end
 end
@@ -80,11 +80,11 @@ function M:showMenu(transcript)
             return
         end
 
-        -- Get the prompt template and replace the placeholder
-        local promptTemplate = self.prompts[choice.text]
-        if promptTemplate then
-            self.logger.d("Using prompt template: " .. promptTemplate)
-            prompt_processor:processPromptWithTranscript(promptTemplate, transcript, self.logger, self.parent and self.parent.ui)
+        -- Get the prompt script path and process with transcript
+        local scriptPath = self.prompts[choice.text]
+        if scriptPath then
+            self.logger.d("Using prompt script: " .. scriptPath)
+            prompt_processor:processPromptWithTranscript(scriptPath, transcript, self.logger, self.parent and self.parent.ui)
         end
     end)
 
