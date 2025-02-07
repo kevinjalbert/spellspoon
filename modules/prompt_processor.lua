@@ -1,12 +1,9 @@
 local M = {}
 
-function M:processPromptWithTranscript(scriptPath, transcript, logger, ui)
+function M:processPromptWithTranscript(promptScript, transcript, logger, ui, config)
     logger.d("Starting prompt processing")
     logger.d("Transcript content:", transcript)
-    logger.d("Using script:", scriptPath)
-
-    local processPromptPath = hs.spoons.scriptPath() .. "../process_prompt.sh"
-    logger.d("Process prompt path:", processPromptPath)
+    logger.d("Using prompt script:", promptScript)
 
     -- Show prompting UI state
     if ui then
@@ -17,9 +14,9 @@ function M:processPromptWithTranscript(scriptPath, transcript, logger, ui)
 
     -- First execute the prompt script to get the full prompt
     logger.d("Executing prompt script")
-    local promptHandle = io.popen("echo '" .. transcript:gsub("'", "'\\''") .. "' | " .. scriptPath .. " 2>/dev/null")
+    local promptHandle = io.popen("echo '" .. transcript:gsub("'", "'\\''") .. "' | " .. promptScript .. " 2>/dev/null")
     if not promptHandle then
-        logger.w("Failed to execute prompt script: " .. scriptPath)
+        logger.w("Failed to execute prompt script: " .. promptScript)
         if ui then ui:cleanup() end
         return
     end
@@ -29,14 +26,16 @@ function M:processPromptWithTranscript(scriptPath, transcript, logger, ui)
     logger.d("Generated prompt:", fullPrompt)
 
     if not fullPrompt then
-        logger.w("Failed to get prompt from script: " .. scriptPath)
+        logger.w("Failed to get prompt from script: " .. promptScript)
         if ui then ui:cleanup() end
         return
     end
 
     -- Create a task to process the prompt
+    local handlePromptingScript = config.handlePromptingScript
+    logger.d("Handle prompting script:", handlePromptingScript)
     logger.d("Creating processing task")
-    local task = hs.task.new(processPromptPath, function(exitCode, stdOut, stdErr)
+    local task = hs.task.new(handlePromptingScript, function(exitCode, stdOut, stdErr)
         -- Clean up UI after processing is complete
         if ui then
             logger.d("Cleaning up UI")

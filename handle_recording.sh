@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .env
+
 # Default values
 SAMPLE_RATE=16000
 CHANNELS=1

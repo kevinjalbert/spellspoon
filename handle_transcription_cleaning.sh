@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .env
+
 # Read input (transcription output) from stdin
 input=$(cat)
 

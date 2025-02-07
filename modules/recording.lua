@@ -1,5 +1,6 @@
 local M = {}
 local prompt_processor = require("prompt_processor")
+prompt_processor.parent = self
 
 -- Recording state
 M.isRecording = false
@@ -119,7 +120,7 @@ function M:stopRecording(interrupted, direct)
                                         self.parent.ui:cleanup()
                                     end
 
-                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.logger, self.parent and self.parent.ui)
+                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.logger, self.parent and self.parent.ui, self.parent and self.parent.config)
                                 else
                                     self.logger.e("Failed to get prompt script path for first prompt")
                                 end
@@ -143,8 +144,8 @@ function M:startRecording(direct)
     if not self.isRecording then
         -- Start recording
         self.logger.d("Starting recording")
-        local scriptPath = os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/handle_recording.sh"
-        self.recordingTask = hs.task.new(scriptPath, function(exitCode, stdOut, stdErr)
+        local recordingScript = self.parent.config.handleRecordingScript
+        self.recordingTask = hs.task.new(recordingScript, function(exitCode, stdOut, stdErr)
             -- Don't do any cleanup here, just log the error if there is one
             if exitCode ~= 0 then
                 self.logger.e("Recording failed: " .. (stdErr or "unknown error"))

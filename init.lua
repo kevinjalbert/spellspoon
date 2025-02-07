@@ -23,18 +23,24 @@
 
 local obj = {}
 
--- Options
-obj.word = "works"
-
 -- Metadata
-obj.name = "Whiston"
+obj.name = "Whistion"
 obj.version = "1.0"
 obj.author = "Kevin Jalbert <kevin.j.jalbert@gmail.com>"
 obj.homepage = "https://github.com/kevinjalbert/whiston"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 
+-- Config
+-- TODO: Make it so this can be set by the user using the .env file, or a config file that is loaded at startup, use defaults if not set
+obj.config = {}
+obj.config.promptsDir = hs.spoons.scriptPath() .. "prompts"
+obj.config.handleTranscribingScript = hs.spoons.scriptPath() .. "handle_transcribing.sh"
+obj.config.handleTranscriptionCleaningScript = hs.spoons.scriptPath() .. "handle_transcription_cleaning.sh"
+obj.config.handleRecordingScript = hs.spoons.scriptPath() .. "handle_recording.sh"
+obj.config.handlePromptingScript = hs.spoons.scriptPath() .. "handle_prompting.sh"
+
 -- Initialize logger
-obj.logger = hs.logger.new('Whiston')
+obj.logger = hs.logger.new('Whistion')
 obj.logger.setLogLevel('debug')  -- Set log level to debug to see all logs
 
 -- Load modules from the Spoon's modules directory

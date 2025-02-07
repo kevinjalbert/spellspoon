@@ -13,7 +13,7 @@ function M:refreshMenuOptions()
     self.menuChoices = {}
     self.prompts = {}
 
-    local promptsDir = hs.spoons.scriptPath() .. "../prompts"
+    local promptsDir = self.parent.config.promptsDir
     local iter, dir_obj = hs.fs.dir(promptsDir)
     local files = {}
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .env
+
 # Default values
 MODEL_PATH="$HOME/Downloads/ggml-large-v3-turbo-q5_0.bin"
 INPUT_FILE="/tmp/recorded_audio.wav"
