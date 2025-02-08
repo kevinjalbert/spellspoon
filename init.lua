@@ -30,10 +30,6 @@ obj.author = "Kevin Jalbert <kevin.j.jalbert@gmail.com>"
 obj.homepage = "https://github.com/kevinjalbert/whiston"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
 
--- Initialize logger
-obj.logger = hs.logger.new('Whistion')
-obj.logger.setLogLevel('debug')  -- Set log level to debug to see all logs
-
 -- Load modules from the Spoon's modules directory
 local spoonPath = debug.getinfo(1, "S").source:sub(2):match("(.*/)")
 package.path = spoonPath .. "modules/?.lua;" .. package.path
@@ -50,13 +46,6 @@ obj.ui.parent = obj
 obj.transcription.parent = obj
 obj.menu.parent = obj
 obj.statistics.parent = obj
-
--- Share logger with modules
-obj.recording.logger = obj.logger
-obj.ui.logger = obj.logger
-obj.transcription.logger = obj.logger
-obj.menu.logger = obj.logger
-obj.statistics.logger = obj.logger
 
 function obj:whiston()
     self.ui:cleanup()
