@@ -4,7 +4,7 @@ local Logger = require("logger")
 local Config = require("config")
 
 -- Function to read prompt title from a script file
-function M:readPromptFile(filename, logger)
+function M:readPromptFile(filename)
     Logger.log("debug", "Reading prompt file: " .. filename)
     local file = io.open(filename, "r")
     if not file then

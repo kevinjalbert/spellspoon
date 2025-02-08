@@ -3,7 +3,7 @@ local M = {}
 local Logger = require("logger")
 local Config = require("config")
 
-function M:processPromptWithTranscript(promptScript, transcript, logger, ui)
+function M:processPromptWithTranscript(promptScript, transcript, ui)
     Logger.log("debug", "Starting prompt processing")
     Logger.log("debug", "Transcript content:", transcript)
     Logger.log("debug", "Using prompt script:", promptScript)
@@ -48,7 +48,7 @@ function M:processPromptWithTranscript(promptScript, transcript, logger, ui)
         if exitCode == 0 and stdOut then
             Logger.log("debug", "Processing successful. Output:", stdOut)
             -- Handle clipboard paste just like in direct mode
-            self:handleClipboardPaste(stdOut, logger)
+            self:handleClipboardPaste(stdOut)
         else
             Logger.log("warn", "Processing failed with exit code:", exitCode)
             if stdErr then
@@ -60,7 +60,7 @@ function M:processPromptWithTranscript(promptScript, transcript, logger, ui)
     task:start()
 end
 
-function M:handleClipboardPaste(text, logger)
+function M:handleClipboardPaste(text)
     if logger then
         Logger.log("debug", "Handling clipboard paste with text:", text)
     end

@@ -35,7 +35,7 @@ function M:refreshMenuOptions()
 
     -- Process files in sorted order
     for _, file in ipairs(files) do
-        local promptData = prompt_reader:readPromptFile(promptsDir .. "/" .. file, self.logger)
+        local promptData = prompt_reader:readPromptFile(promptsDir .. "/" .. file)
         if promptData then
             table.insert(self.menuChoices, {
                 text = promptData.title,
@@ -87,7 +87,7 @@ function M:showMenu(transcript)
         local scriptPath = self.prompts[choice.text]
         if scriptPath then
             Logger.log("debug", "Using prompt script: " .. scriptPath)
-            prompt_processor:processPromptWithTranscript(scriptPath, transcript, self.logger, self.parent and self.parent.ui)
+            prompt_processor:processPromptWithTranscript(scriptPath, transcript, self.parent and self.parent.ui)
         end
     end)
 

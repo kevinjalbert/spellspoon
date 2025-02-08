@@ -124,7 +124,7 @@ function M:stopRecording(interrupted, direct)
                                         self.parent.ui:cleanup()
                                     end
 
-                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.logger, self.parent and self.parent.ui)
+                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.parent and self.parent.ui)
                                 else
                                     Logger.log("error", "Failed to get prompt script path for first prompt")
                                 end
