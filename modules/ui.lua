@@ -1,5 +1,8 @@
 local M = {}
 
+local Logger = require("logger")
+local Config = require("config")
+
 M.recordingIndicator = nil
 M.statsModal = nil
 M.pulseTimer = nil
@@ -296,7 +299,7 @@ function M:updateTimer()
 end
 
 function M:cleanup()
-    self.logger.d("UI cleanup function called")
+    Logger.log("debug", "UI cleanup function called")
     -- Stop all timers
     if self.pulseTimer then
         self.pulseTimer:stop()

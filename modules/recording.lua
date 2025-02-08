@@ -1,4 +1,8 @@
 local M = {}
+
+local Logger = require("logger")
+local Config = require("config")
+
 local prompt_processor = require("prompt_processor")
 prompt_processor.parent = self
 
@@ -46,7 +50,7 @@ function M:stopRecording(interrupted, direct)
         self.escHotkey = nil
     end
 
-    self.logger.d("Stopping recording" .. (interrupted and " (interrupted)" or "") .. (direct and " (direct)" or ""))
+    Logger.log("debug", "Stopping recording" .. (interrupted and " (interrupted)" or "") .. (direct and " (direct)" or ""))
 
     -- If there's no recording task, nothing to do
     if not self.recordingTask then
@@ -94,10 +98,10 @@ function M:stopRecording(interrupted, direct)
 
             -- Begin transcription immediately once file is ready
             self.parent.transcription:startTranscription(function(transcript, error)
-                self.logger.d("Transcription callback received: " .. (transcript and "success" or "error: " .. (error or "unknown")))
+                Logger.log("debug", "Transcription callback received: " .. (transcript and "success" or "error: " .. (error or "unknown")))
 
                 if error then
-                    self.logger.e("Transcription error: " .. error)
+                    Logger.log("error", "Transcription error: " .. error)
                     -- Only clean up UI on error
                     if self.parent and self.parent.ui then
                         self.parent.ui:cleanup()
@@ -114,20 +118,20 @@ function M:stopRecording(interrupted, direct)
                             if firstPromptScriptPath then
                                 -- Get the prompt script path and process with transcript
                                 if firstPromptScriptPath then
-                                    self.logger.d("Using prompt script: " .. firstPromptScriptPath)
+                                    Logger.log("debug", "Using prompt script: " .. firstPromptScriptPath)
 
                                     if self.parent and self.parent.ui then
                                         self.parent.ui:cleanup()
                                     end
 
-                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.logger, self.parent and self.parent.ui, self.parent and self.parent.config)
+                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.logger, self.parent and self.parent.ui)
                                 else
-                                    self.logger.e("Failed to get prompt script path for first prompt")
+                                    Logger.log("error", "Failed to get prompt script path for first prompt")
                                 end
                             end
                         else
                             -- Log error if no prompts are available
-                            self.logger.e("No prompts available")
+                            Logger.log("error", "No prompts available")
                         end
                     else
                         -- Show the menu with the processed transcript
@@ -143,12 +147,13 @@ end
 function M:startRecording(direct)
     if not self.isRecording then
         -- Start recording
-        self.logger.d("Starting recording")
-        local recordingScript = self.parent.config.handleRecordingScript
+        Logger.log("debug", "Starting recording")
+        local recordingScript = Config.handleRecordingScript
+        Logger.log("debug", "Running recording script: " .. recordingScript)
         self.recordingTask = hs.task.new(recordingScript, function(exitCode, stdOut, stdErr)
             -- Don't do any cleanup here, just log the error if there is one
             if exitCode ~= 0 then
-                self.logger.e("Recording failed: " .. (stdErr or "unknown error"))
+                Logger.log("error", "Recording failed: " .. (stdErr or "unknown error"))
             end
         end)
         self.recordingTask:start()

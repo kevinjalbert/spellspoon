@@ -1,11 +1,14 @@
 local M = {}
 
+local Logger = require("logger")
+local Config = require("config")
+
 -- Function to read prompt title from a script file
 function M:readPromptFile(filename, logger)
-    logger.d("Reading prompt file: " .. filename)
+    Logger.log("debug", "Reading prompt file: " .. filename)
     local file = io.open(filename, "r")
     if not file then
-        logger.w("Failed to open prompt file: " .. filename)
+        Logger.log("warn", "Failed to open prompt file: " .. filename)
         return nil
     end
 
@@ -16,7 +19,7 @@ function M:readPromptFile(filename, logger)
 
     -- Verify it's a shell script and has a title
     if not shebang:match("^#!") or not titleLine or not titleLine:match("^#%s*(.+)") then
-        logger.w("Invalid prompt file format: " .. filename)
+        Logger.log("warn", "Invalid prompt file format: " .. filename)
         return nil
     end
 
@@ -24,13 +27,13 @@ function M:readPromptFile(filename, logger)
     local title = titleLine:match("^#%s*(.+)")
 
     if title then
-        logger.d("Loaded prompt file " .. filename .. ":\nTitle: " .. title)
+        Logger.log("debug", "Loaded prompt file " .. filename .. ":\nTitle: " .. title)
         return {
             title = title,
             path = filename  -- Return the path instead of the prompt content
         }
     end
-    logger.w("Failed to get title from: " .. filename)
+    Logger.log("warn", "Failed to get title from: " .. filename)
     return nil
 end
 

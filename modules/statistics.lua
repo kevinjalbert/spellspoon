@@ -1,17 +1,20 @@
 local M = {}
 
+local Logger = require("logger")
+local Config = require("config")
+
 -- Helper function to execute SQLite queries
 function M:executeQuery(query)
     local db_file = os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/transcription_stats.sqlite"
     -- Wrap db_file in single quotes and query in double quotes.
     local command = string.format("/usr/bin/sqlite3 '%s' \"%s\"", db_file, query)
 
-    self.logger.d("Executing SQL query: " .. query)
-    self.logger.d("Full command: " .. command)
+    Logger.log("debug", "Executing SQL query: " .. query)
+    Logger.log("debug", "Full command: " .. command)
 
     local handle = io.popen(command .. " 2>&1")  -- Capture stderr too
     if not handle then
-        self.logger.e("Failed to execute SQLite command")
+        Logger.log("error", "Failed to execute SQLite command")
         return nil
     end
 
@@ -19,17 +22,17 @@ function M:executeQuery(query)
     local success, _, code = handle:close()
 
     if not success then
-        self.logger.e("Command failed with exit code: " .. (code or "unknown"))
-        self.logger.e("Error output: " .. result)
+        Logger.log("error", "Command failed with exit code: " .. (code or "unknown"))
+        Logger.log("error", "Error output: " .. result)
         return nil
     end
 
     if not result or result == "" then
-        self.logger.d("Query returned empty result")
+        Logger.log("debug", "Query returned empty result")
         return nil
     end
 
-    self.logger.d("Query result: " .. result)
+    Logger.log("debug", "Query result: " .. result)
     return result
 end
 
@@ -77,11 +80,11 @@ function M:getStats(period)
     ]], timeFilters[period])
 
     -- Log the time filter being used
-    self.logger.d("Using time filter for " .. period .. ": " .. timeFilters[period])
+    Logger.log("debug", "Using time filter for " .. period .. ": " .. timeFilters[period])
 
     local result = self:executeQuery(query)
     if not result then
-        self.logger.e("Failed to get stats for period: " .. period)
+        Logger.log("error", "Failed to get stats for period: " .. period)
         return {
             count = 0,
             characters = 0,
@@ -90,14 +93,14 @@ function M:getStats(period)
         }
     end
 
-    self.logger.d("Raw stats result for " .. period .. ": " .. result)
+    Logger.log("debug", "Raw stats result for " .. period .. ": " .. result)
 
     -- Trim any whitespace or newlines from the result
     result = result:gsub("^%s*(.-)%s*$", "%1")
 
     -- Parse the pipe-separated values
     local count, chars, words, duration = result:match("([^|]+)|([^|]+)|([^|]+)|([^|]+)")
-    self.logger.d(string.format("Parsed values for %s - count: %s, chars: %s, words: %s, duration: %s",
+    Logger.log("debug", string.format("Parsed values for %s - count: %s, chars: %s, words: %s, duration: %s",
         period, count or "nil", chars or "nil", words or "nil", duration or "nil"))
 
     local stats = {
@@ -107,7 +110,7 @@ function M:getStats(period)
         duration = tonumber(duration) or 0
     }
 
-    self.logger.d(string.format("Final stats for %s: count=%d, chars=%d, words=%d, duration=%f",
+    Logger.log("debug", string.format("Final stats for %s: count=%d, chars=%d, words=%d, duration=%f",
         period, stats.count, stats.characters, stats.words, stats.duration))
 
     return stats
@@ -115,23 +118,23 @@ end
 
 -- Format duration in HH:MM:SS
 function M:formatDuration(seconds)
-    self.logger.d("Formatting duration: " .. tostring(seconds) .. " seconds")
+    Logger.log("debug", "Formatting duration: " .. tostring(seconds) .. " seconds")
     local hours = math.floor(seconds / 3600)
     local minutes = math.floor((seconds % 3600) / 60)
     local secs = math.floor(seconds % 60)
     local formatted = string.format("%02d:%02d:%02d", hours, minutes, secs)
-    self.logger.d("Formatted duration: " .. formatted)
+    Logger.log("debug", "Formatted duration: " .. formatted)
     return formatted
 end
 
 -- Get all stats formatted for display
 function M:getAllStats()
-    self.logger.d("Getting all stats")
+    Logger.log("debug", "Getting all stats")
     local periods = {"daily", "weekly", "monthly", "yearly", "lifetime"}
     local stats = {}
 
     for _, period in ipairs(periods) do
-        self.logger.d("Getting stats for period: " .. period)
+        Logger.log("debug", "Getting stats for period: " .. period)
         local data = self:getStats(period)
         stats[period] = {
             transcriptions = data.count,
@@ -139,12 +142,12 @@ function M:getAllStats()
             words = data.words,
             duration = self:formatDuration(data.duration)
         }
-        self.logger.d(string.format("Formatted stats for %s: transcriptions=%d, chars=%d, words=%d, duration=%s",
+        Logger.log("debug", string.format("Formatted stats for %s: transcriptions=%d, chars=%d, words=%d, duration=%s",
             period, stats[period].transcriptions, stats[period].characters,
             stats[period].words, stats[period].duration))
     end
 
-    self.logger.d("Returning final stats table")
+    Logger.log("debug", "Returning final stats table")
     return stats
 end
 

@@ -1,5 +1,8 @@
 local M = {}
 
+local Logger = require("logger")
+local Config = require("config")
+
 -- Fuzzy finding helper function
 function M:fuzzyMatch(str, pattern)
     -- Convert to lowercase for case-insensitive matching

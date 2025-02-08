@@ -3,6 +3,9 @@ local fuzzy_matcher = require("fuzzy_matcher")
 local prompt_reader = require("prompt_reader")
 local prompt_processor = require("prompt_processor")
 
+local Logger = require("logger")
+local Config = require("config")
+
 -- Menu state
 M.menuChoices = {}
 M.prompts = {}
@@ -13,7 +16,7 @@ function M:refreshMenuOptions()
     self.menuChoices = {}
     self.prompts = {}
 
-    local promptsDir = self.parent.config.promptsDir
+    local promptsDir = Config.promptsDir
     local iter, dir_obj = hs.fs.dir(promptsDir)
     local files = {}
 
@@ -62,7 +65,7 @@ end
 
 function M:showMenu(transcript)
     self:refreshMenuOptions() -- Refresh menu options before showing
-    self.logger.d("Showing menu with transcript")
+    Logger.log("debug", "Showing menu with transcript")
 
     -- Clean up UI immediately when showing menu
     if self.parent and self.parent.ui then
@@ -71,19 +74,19 @@ function M:showMenu(transcript)
 
     -- Create a chooser with our menu options
     local chooser = hs.chooser.new(function(choice)
-        self.logger.d("Menu choice made: " .. (choice and choice.text or "cancelled"))
+        Logger.log("debug", "Menu choice made: " .. (choice and choice.text or "cancelled"))
         -- Clean up menu-specific state
 
         if not choice then
             -- User cancelled without selection
-            self.logger.d("Menu cancelled")
+            Logger.log("debug", "Menu cancelled")
             return
         end
 
         -- Get the prompt script path and process with transcript
         local scriptPath = self.prompts[choice.text]
         if scriptPath then
-            self.logger.d("Using prompt script: " .. scriptPath)
+            Logger.log("debug", "Using prompt script: " .. scriptPath)
             prompt_processor:processPromptWithTranscript(scriptPath, transcript, self.logger, self.parent and self.parent.ui)
         end
     end)
@@ -105,14 +108,13 @@ function M:showMenu(transcript)
 
     -- Bind escape key to close menu
     self.escHotkey = hs.hotkey.bind({}, "escape", function()
-        self.logger.d("Menu escape pressed")
+        Logger.log("debug", "Menu escape pressed")
         chooser:hide()
         self.escHotkey:delete()
     end)
 
     -- Show the menu
     chooser:show()
-    self.logger.d("Menu show command issued")
 end
 
 return M
