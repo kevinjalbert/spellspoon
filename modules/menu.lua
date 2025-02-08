@@ -5,6 +5,7 @@ local prompt_processor = require("prompt_processor")
 
 local Logger = require("logger")
 local Config = require("config")
+local UI = require("ui")
 
 -- Menu state
 M.menuChoices = {}
@@ -46,13 +47,6 @@ function M:refreshMenuOptions()
     end
 end
 
-function M:cleanup()
-    -- Clean up UI
-    if self.parent and self.parent.ui then
-        self.parent.ui:cleanup()
-    end
-end
-
 function M:handleClipboardPaste(text)
     if text then
         -- Copy the text to the clipboard
@@ -68,9 +62,7 @@ function M:showMenu(transcript)
     Logger.log("debug", "Showing menu with transcript")
 
     -- Clean up UI immediately when showing menu
-    if self.parent and self.parent.ui then
-        self.parent.ui:cleanup()
-    end
+    UI:cleanup()
 
     -- Create a chooser with our menu options
     local chooser = hs.chooser.new(function(choice)
@@ -87,7 +79,7 @@ function M:showMenu(transcript)
         local scriptPath = self.prompts[choice.text]
         if scriptPath then
             Logger.log("debug", "Using prompt script: " .. scriptPath)
-            prompt_processor:processPromptWithTranscript(scriptPath, transcript, self.parent and self.parent.ui)
+            prompt_processor:processPromptWithTranscript(scriptPath, transcript)
         end
     end)
 

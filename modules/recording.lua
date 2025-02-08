@@ -2,9 +2,10 @@ local M = {}
 
 local Logger = require("logger")
 local Config = require("config")
-
-local prompt_processor = require("prompt_processor")
-prompt_processor.parent = self
+local UI = require("ui")
+local Transcription = require("transcription")
+local Menu = require("menu")
+local PromptProcessor = require("prompt_processor")
 
 -- Recording state
 M.isRecording = false
@@ -32,9 +33,7 @@ function M:cleanup()
     self.startTime = nil
 
     -- Clean up UI
-    if self.parent and self.parent.ui then
-        self.parent.ui:cleanup()
-    end
+    UI:cleanup()
 
     -- Clean up hotkeys
     if self.escHotkey then
@@ -66,9 +65,7 @@ function M:stopRecording(interrupted, direct)
     end
 
     -- Update the modal to "Processing..." immediately
-    if self.parent and self.parent.ui then
-        self.parent.ui:setTranscribingStatus()
-    end
+    UI:setTranscribingStatus()
 
     -- Send SIGTERM to ffmpeg to gracefully stop recording
     self.recordingTask:terminate()
@@ -97,34 +94,30 @@ function M:stopRecording(interrupted, direct)
             self.isRecording = false
 
             -- Begin transcription immediately once file is ready
-            self.parent.transcription:startTranscription(function(transcript, error)
+            Transcription:startTranscription(function(transcript, error)
                 Logger.log("debug", "Transcription callback received: " .. (transcript and "success" or "error: " .. (error or "unknown")))
 
                 if error then
                     Logger.log("error", "Transcription error: " .. error)
                     -- Only clean up UI on error
-                    if self.parent and self.parent.ui then
-                        self.parent.ui:cleanup()
-                    end
+                    UI:cleanup()
                     return
                 end
 
                 if transcript then
                     if direct then
                         -- For direct prompting, use the first available prompt
-                        self.parent.menu:refreshMenuOptions()
-                        if #self.parent.menu.menuChoices > 0 then
-                            local firstPromptScriptPath = self.parent.menu.prompts[self.parent.menu.menuChoices[1].text]
+                        Menu:refreshMenuOptions()
+                        if #Menu.menuChoices > 0 then
+                            local firstPromptScriptPath = Menu.prompts[Menu.menuChoices[1].text]
                             if firstPromptScriptPath then
                                 -- Get the prompt script path and process with transcript
                                 if firstPromptScriptPath then
                                     Logger.log("debug", "Using prompt script: " .. firstPromptScriptPath)
 
-                                    if self.parent and self.parent.ui then
-                                        self.parent.ui:cleanup()
-                                    end
+                                    UI:cleanup()
 
-                                    prompt_processor:processPromptWithTranscript(firstPromptScriptPath, transcript, self.parent and self.parent.ui)
+                                    PromptProcessor:processPromptWithTranscript(firstPromptScriptPath, transcript)
                                 else
                                     Logger.log("error", "Failed to get prompt script path for first prompt")
                                 end
@@ -136,7 +129,7 @@ function M:stopRecording(interrupted, direct)
                     else
                         -- Show the menu with the processed transcript
                         -- UI cleanup will happen in the menu module when menu is shown
-                        self.parent.menu:showMenu(transcript)
+                        Menu:showMenu(transcript)
                     end
                 end
             end)
@@ -161,8 +154,8 @@ function M:startRecording(direct)
         self.isDirect = direct -- Store the direct flag
 
         -- Show recording indicator
-        self.parent.ui:createRecordingIndicator()
-        self.parent.ui:setRecordingStatus()
+        UI:createRecordingIndicator()
+        UI:setRecordingStatus()
 
         -- Bind 'Esc' key to stop recording without transcription
         if self.escHotkey then

@@ -2,25 +2,24 @@ local M = {}
 
 local Logger = require("logger")
 local Config = require("config")
+local UI = require("ui")
 
-function M:processPromptWithTranscript(promptScript, transcript, ui)
+function M:processPromptWithTranscript(promptScript, transcript)
     Logger.log("debug", "Starting prompt processing")
     Logger.log("debug", "Transcript content:", transcript)
     Logger.log("debug", "Using prompt script:", promptScript)
 
     -- Show prompting UI state
-    if ui then
-        Logger.log("debug", "Creating UI elements")
-        ui:createRecordingIndicator()
-        ui:setPromptingStatus()
-    end
+    Logger.log("debug", "Creating UI elements")
+    UI:createRecordingIndicator()
+    UI:setPromptingStatus()
 
     -- First execute the prompt script to get the full prompt
     Logger.log("debug", "Executing prompt script")
     local promptHandle = io.popen("echo '" .. transcript:gsub("'", "'\\''") .. "' | " .. promptScript .. " 2>/dev/null")
     if not promptHandle then
         Logger.log("warn", "Failed to execute prompt script: " .. promptScript)
-        if ui then ui:cleanup() end
+        UI:cleanup()
         return
     end
 
@@ -30,7 +29,7 @@ function M:processPromptWithTranscript(promptScript, transcript, ui)
 
     if not fullPrompt then
         Logger.log("warn", "Failed to get prompt from script: " .. promptScript)
-        if ui then ui:cleanup() end
+        UI:cleanup()
         return
     end
 
@@ -40,10 +39,8 @@ function M:processPromptWithTranscript(promptScript, transcript, ui)
     Logger.log("debug", "Creating processing task")
     local task = hs.task.new(handlePromptingScript, function(exitCode, stdOut, stdErr)
         -- Clean up UI after processing is complete
-        if ui then
-            Logger.log("debug", "Cleaning up UI")
-            ui:cleanup()
-        end
+        Logger.log("debug", "Cleaning up UI")
+        UI:cleanup()
 
         if exitCode == 0 and stdOut then
             Logger.log("debug", "Processing successful. Output:", stdOut)

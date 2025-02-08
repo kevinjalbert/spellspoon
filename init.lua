@@ -21,50 +21,43 @@
 ---
 --- Download: xxxxx
 
-local obj = {}
+local M = {}
 
 -- Metadata
-obj.name = "Whistion"
-obj.version = "1.0"
-obj.author = "Kevin Jalbert <kevin.j.jalbert@gmail.com>"
-obj.homepage = "https://github.com/kevinjalbert/whiston"
-obj.license = "MIT - https://opensource.org/licenses/MIT"
+M.name = "Whistion"
+M.version = "1.0"
+M.author = "Kevin Jalbert <kevin.j.jalbert@gmail.com>"
+M.homepage = "https://github.com/kevinjalbert/whiston"
+M.license = "MIT - https://opensource.org/licenses/MIT"
 
 -- Load modules from the Spoon's modules directory
 local spoonPath = debug.getinfo(1, "S").source:sub(2):match("(.*/)")
 package.path = spoonPath .. "modules/?.lua;" .. package.path
 
-obj.recording = require("recording")
-obj.ui = require("ui")
-obj.transcription = require("transcription")
-obj.menu = require("menu")
+local Recording = require("recording")
+local UI = require("ui")
+local Menu = require("menu")
 
--- Set up parent references
-obj.recording.parent = obj
-obj.ui.parent = obj
-obj.transcription.parent = obj
-obj.menu.parent = obj
-
-function obj:whiston()
-    self.ui:cleanup()
-    if not self.recording.isRecording then
-        self.recording:startRecording()
+function M:whiston()
+    UI:cleanup()
+    if not Recording.isRecording then
+        Recording:startRecording()
     else
-        self.recording:stopRecording(false)
+        Recording:stopRecording(false)
     end
 end
 
-function obj:whistonDirect()
-    self.ui:cleanup()
-    if not self.recording.isRecording then
-        self.recording:startRecording(true)  -- Pass true for direct mode
+function M:whistonDirect()
+    UI:cleanup()
+    if not Recording.isRecording then
+        Recording:startRecording(true)  -- Pass true for direct mode
     else
-        self.recording:stopRecording(false, true)  -- Not interrupted, but direct mode
+        Recording:stopRecording(false, true)  -- Not interrupted, but direct mode
     end
 end
 
-function obj:whistonMenu()
-    self.ui:cleanup()
+function M:whistonMenu()
+    UI:cleanup()
     -- Get the currently focused element
     local element = hs.uielement.focusedElement()
     if element then
@@ -72,16 +65,16 @@ function obj:whistonMenu()
         local selectedText = element:selectedText()
         if selectedText then
             -- Show menu directly with the selected text
-            self.menu:showMenu(selectedText)
+            Menu:showMenu(selectedText)
         end
     end
 end
 
-function obj:toggleStats()
-    self.ui:toggleStatsModal()
+function M:toggleStats()
+    UI:toggleStatsModal()
 end
 
-function obj:bindHotkeys(mapping)
+function M:bindHotkeys(mapping)
     local def = {
         whiston = {{"cmd", "alt", "ctrl"}, "w"},
         whistonDirect = {{"cmd", "alt", "ctrl"}, "e"},
@@ -109,4 +102,4 @@ function obj:bindHotkeys(mapping)
     end
 end
 
-return obj
+return M
