@@ -38,14 +38,12 @@ obj.recording = require("recording")
 obj.ui = require("ui")
 obj.transcription = require("transcription")
 obj.menu = require("menu")
-obj.statistics = require("statistics")
 
 -- Set up parent references
 obj.recording.parent = obj
 obj.ui.parent = obj
 obj.transcription.parent = obj
 obj.menu.parent = obj
-obj.statistics.parent = obj
 
 function obj:whiston()
     self.ui:cleanup()

@@ -2,6 +2,7 @@ local M = {}
 
 local Logger = require("logger")
 local Config = require("config")
+local Statistics = require("statistics")
 
 M.recordingIndicator = nil
 M.statsModal = nil
@@ -55,7 +56,7 @@ function M:createStatsModal()
     }
 
     -- Get statistics
-    local stats = self.parent.statistics:getAllStats()
+    local stats = Statistics:getAllStats()
     local y = 70
     local periods = {
         {name = "Today", key = "daily"},
