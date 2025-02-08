@@ -35,9 +35,9 @@ log_transcription_stats() {
         );"
     fi
 
-    # Insert stats into database
-    sqlite3 "$db_file" "INSERT INTO transcriptions (characters, words, audio_length_seconds)
-        VALUES ($char_count, $word_count, $audio_length);"
+    # Insert stats into database, use local time for easy of use for stats
+    sqlite3 "$db_file" "INSERT INTO transcriptions (created_at, characters, words, audio_length_seconds)
+        VALUES (datetime('now', 'localtime'), $char_count, $word_count, $audio_length);"
 }
 
 # Log the stats for this transcription
