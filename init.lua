@@ -37,6 +37,7 @@ package.path = spoonPath .. "modules/?.lua;" .. package.path
 local Recording = require("recording")
 local Indicator = require("ui.indicator")
 local Menu = require("ui.menu")
+local StatsModal = require("ui.stats_modal")
 
 function M:whiston()
     Indicator:cleanup()
@@ -71,7 +72,7 @@ function M:whistonMenu()
 end
 
 function M:toggleStats()
-    Indicator:toggleStatsModal()
+    StatsModal:toggleStatsModal()
 end
 
 function M:bindHotkeys(mapping)
