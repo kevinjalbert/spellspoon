@@ -34,11 +34,11 @@ M.license = "MIT - https://opensource.org/licenses/MIT"
 local spoonPath = debug.getinfo(1, "S").source:sub(2):match("(.*/)")
 package.path = spoonPath .. "modules/?.lua;" .. package.path
 
-local Recording = require("recording")
+local Recording = require("record.recording")
 local Indicator = require("ui.indicator")
-local Menu = require("ui.menu")
+local Menu = require("menu.menu")
 local StatsModal = require("ui.stats_modal")
-local Statistics = require("statistics")
+local Statistics = require("statistics.statistics")
 
 -- Initialize the statistics database
 Statistics:initializeDatabase()

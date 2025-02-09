@@ -3,9 +3,9 @@ local M = {}
 local Logger = require("utils.logger")
 local Config = require("utils.config")
 local Indicator = require("ui.indicator")
-local Transcription = require("transcription")
-local Menu = require("ui.menu")
-local PromptProcessor = require("prompt_processor")
+local Transcription = require("transcribe.transcription")
+local Menu = require("menu.menu")
+local PromptProcessor = require("prompt.prompt_processor")
 
 -- Recording state
 M.isRecording = false

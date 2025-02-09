@@ -1,7 +1,7 @@
 local M = {}
-local fuzzy_matcher = require("fuzzy_matcher")
-local prompt_reader = require("prompt_reader")
-local prompt_processor = require("prompt_processor")
+local fuzzy_matcher = require("menu.fuzzy_matcher")
+local prompt_reader = require("prompt.prompt_reader")
+local prompt_processor = require("prompt.prompt_processor")
 
 local Logger = require("utils.logger")
 local Config = require("utils.config")

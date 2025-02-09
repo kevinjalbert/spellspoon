@@ -2,7 +2,7 @@ M = {}
 
 local Logger = require("utils.logger")
 local Config = require("utils.config")
-local Statistics = require("statistics")
+local Statistics = require("statistics.statistics")
 
 M.statsModal = nil
 
