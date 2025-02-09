@@ -4,7 +4,7 @@ local Logger = require("logger")
 local Config = require("config")
 local Indicator = require("ui.indicator")
 local Transcription = require("transcription")
-local Menu = require("menu")
+local Menu = require("ui.menu")
 local PromptProcessor = require("prompt_processor")
 
 -- Recording state

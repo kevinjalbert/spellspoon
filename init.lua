@@ -36,7 +36,7 @@ package.path = spoonPath .. "modules/?.lua;" .. package.path
 
 local Recording = require("recording")
 local Indicator = require("ui.indicator")
-local Menu = require("menu")
+local Menu = require("ui.menu")
 
 function M:whiston()
     Indicator:cleanup()
