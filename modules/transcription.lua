@@ -3,6 +3,52 @@ local M = {}
 local Logger = require("logger")
 local Config = require("config")
 
+-- Helper function to trim all whitespace
+local function trim(s)
+    -- Remove leading/trailing whitespace, including newlines, carriage returns, and tabs
+    return s:gsub("^%s+", ""):gsub("%s+$", ""):gsub("\r", "")
+end
+
+-- Helper function to count words in a string
+local function countWords(s)
+    local words = 0
+    for _ in s:gmatch("%S+") do
+        words = words + 1
+    end
+    return words
+end
+
+-- Helper function to log transcription statistics
+local function logTranscriptionStats(text)
+    local charCount = #text
+    local wordCount = countWords(text)
+
+    -- Get audio length from the temporary file
+    local audioLength = 0
+    local audioFile = io.open("/tmp/recorded_audio.wav", "r")
+    if audioFile then
+        audioFile:close()
+        -- Create a pipe to capture ffprobe output synchronously
+        local pipe = io.popen('/opt/homebrew/bin/ffprobe -i /tmp/recorded_audio.wav -show_entries format=duration -v quiet -of csv="p=0" 2>/dev/null')
+        if pipe then
+            local output = pipe:read("*a")
+            pipe:close()
+            audioLength = tonumber(output) or 0
+        end
+    end
+
+    -- Insert stats into SQLite database
+    local sqlite = hs.sqlite3.open(Config.transcriptionStatsDatabase)
+    if sqlite then
+        local query = string.format(
+            "INSERT INTO transcriptions (created_at, characters, words, audio_length_seconds) VALUES (datetime('now', 'localtime'), %d, %d, %f);",
+            charCount, wordCount, audioLength
+        )
+        sqlite:exec(query)
+        sqlite:close()
+    end
+end
+
 function M:startTranscription(callback)
     Logger.log("debug", "Starting transcription process")
 
@@ -13,24 +59,14 @@ function M:startTranscription(callback)
         Logger.log("debug", "Transcription script finished with exit code: " .. exitCode)
 
         if exitCode == 0 and stdOut then
-            Logger.log("debug", "Starting post-transcription transcribing")
-            -- Pass transcription output to the shell script for processing
+            Logger.log("debug", "Processing transcription output")
 
-            local transcriptionCleaningScript = Config.handleTranscriptionCleaningScript
-            local transcriptionCleaningTask = hs.task.new(transcriptionCleaningScript, function(handleExitCode, handleStdOut, handleStdErr)
-                Logger.log("debug", "Post-transcription processing finished with exit code: " .. handleExitCode)
+            -- Process the transcription output inline
+            local processedText = trim(stdOut)
+            logTranscriptionStats(processedText)
 
-                if handleExitCode == 0 and handleStdOut then
-                    Logger.log("debug", "Calling callback with processed transcript")
-                    callback(handleStdOut)
-                else
-                    Logger.log("error", "Post-transcription handling failed: " .. (handleStdErr or "unknown error"))
-                    callback(nil, handleStdErr or "unknown error")
-                end
-            end, { "-c", stdOut })
-
-            transcriptionCleaningTask:setInput(stdOut)
-            transcriptionCleaningTask:start()
+            Logger.log("debug", "Calling callback with processed transcript")
+            callback(processedText)
         else
             Logger.log("error", "Transcription failed: " .. (stdErr or "unknown error"))
             callback(nil, stdErr or "unknown error")
@@ -41,4 +77,3 @@ function M:startTranscription(callback)
 end
 
 return M
-
