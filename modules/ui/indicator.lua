@@ -126,7 +126,7 @@ function M:toggleStatsModal()
     end
 end
 
-function M:createRecordingIndicator()
+function M:createIndicator()
     local screen = hs.screen.primaryScreen()
     local frame = screen:frame()
 
@@ -237,7 +237,7 @@ end
 -- }
 function M:setIndicatorStatus(config)
     if not self.recordingIndicator then
-        self:createRecordingIndicator()
+        self:createIndicator()
     end
 
     -- Update dot color and text

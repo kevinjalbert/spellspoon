@@ -2,7 +2,7 @@ local M = {}
 
 local Logger = require("logger")
 local Config = require("config")
-local UI = require("ui")
+local Indicator = require("ui.indicator")
 local Transcription = require("transcription")
 local Menu = require("menu")
 local PromptProcessor = require("prompt_processor")
@@ -31,8 +31,8 @@ function M:cleanup()
     self.isRecording = false
     self.startTime = nil
 
-    -- Clean up UI
-    UI:cleanup()
+    -- Clean up recording indicator
+    Indicator:cleanup()
 
     -- Clean up hotkeys
     if self.escHotkey then
@@ -64,7 +64,7 @@ function M:stopRecording(interrupted, direct)
     end
 
     -- Update the modal to "Processing..." immediately
-    UI:setTranscribingStatus()
+    Indicator:setTranscribingStatus()
 
     -- Send SIGTERM to ffmpeg to gracefully stop recording
     self.recordingTask:terminate()
@@ -99,7 +99,7 @@ function M:stopRecording(interrupted, direct)
                 if error then
                     Logger.log("error", "Transcription error: " .. error)
                     -- Only clean up UI on error
-                    UI:cleanup()
+                    Indicator:cleanup()
                     return
                 end
 
@@ -114,7 +114,7 @@ function M:stopRecording(interrupted, direct)
                                 if firstPromptScriptPath then
                                     Logger.log("debug", "Using prompt script: " .. firstPromptScriptPath)
 
-                                    UI:cleanup()
+                                    Indicator:cleanup()
 
                                     PromptProcessor:processPromptWithTranscript(firstPromptScriptPath, transcript)
                                 else
@@ -152,8 +152,8 @@ function M:startRecording(direct)
         self.isRecording = true
 
         -- Show recording indicator
-        UI:createRecordingIndicator()
-        UI:setRecordingStatus()
+        Indicator:createIndicator()
+        Indicator:setRecordingStatus()
 
         -- Bind 'Esc' key to stop recording without transcription
         if self.escHotkey then

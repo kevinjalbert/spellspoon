@@ -35,11 +35,11 @@ local spoonPath = debug.getinfo(1, "S").source:sub(2):match("(.*/)")
 package.path = spoonPath .. "modules/?.lua;" .. package.path
 
 local Recording = require("recording")
-local UI = require("ui")
+local Indicator = require("ui.indicator")
 local Menu = require("menu")
 
 function M:whiston()
-    UI:cleanup()
+    Indicator:cleanup()
     if not Recording.isRecording then
         Recording:startRecording()
     else
@@ -48,7 +48,7 @@ function M:whiston()
 end
 
 function M:whistonDirect()
-    UI:cleanup()
+    Indicator:cleanup()
     if not Recording.isRecording then
         Recording:startRecording(true)  -- Pass true for direct mode
     else
@@ -57,7 +57,7 @@ function M:whistonDirect()
 end
 
 function M:whistonMenu()
-    UI:cleanup()
+    Indicator:cleanup()
     -- Get the currently focused element
     local element = hs.uielement.focusedElement()
     if element then
@@ -71,7 +71,7 @@ function M:whistonMenu()
 end
 
 function M:toggleStats()
-    UI:toggleStatsModal()
+    Indicator:toggleStatsModal()
 end
 
 function M:bindHotkeys(mapping)

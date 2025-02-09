@@ -5,7 +5,7 @@ local prompt_processor = require("prompt_processor")
 
 local Logger = require("logger")
 local Config = require("config")
-local UI = require("ui")
+local Indicator = require("ui.indicator")
 
 -- Menu state
 M.menuChoices = {}
@@ -61,8 +61,8 @@ function M:showMenu(transcript)
     self:refreshMenuOptions() -- Refresh menu options before showing
     Logger.log("debug", "Showing menu with transcript")
 
-    -- Clean up UI immediately when showing menu
-    UI:cleanup()
+    -- Clean up recording indicator immediately when showing menu
+    Indicator:cleanup()
 
     -- Create a chooser with our menu options
     local chooser = hs.chooser.new(function(choice)
