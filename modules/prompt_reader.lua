@@ -1,7 +1,7 @@
 local M = {}
 
-local Logger = require("logger")
-local Config = require("config")
+local Logger = require("utils.logger")
+local Config = require("utils.config")
 
 -- Function to read prompt title from a script file
 -- The expectations of these prompt scripts are:

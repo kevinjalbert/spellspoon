@@ -1,7 +1,7 @@
 local M = {}
 
-local Logger = require("logger")
-local Config = require("config")
+local Logger = require("utils.logger")
+local Config = require("utils.config")
 local Indicator = require("ui.indicator")
 
 function M:processPromptWithTranscript(promptScript, transcript)

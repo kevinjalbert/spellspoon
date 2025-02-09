@@ -1,7 +1,7 @@
 local M = {}
 
-local Logger = require("logger")
-local Config = require("config")
+local Logger = require("utils.logger")
+local Config = require("utils.config")
 
 -- Initialize the SQLite database schema
 function M:initializeDatabase()

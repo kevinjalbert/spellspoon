@@ -1,7 +1,7 @@
 local M = {}
 
-local Logger = require("logger")
-local Config = require("config")
+local Logger = require("utils.logger")
+local Config = require("utils.config")
 
 -- Fuzzy finding helper function
 function M:fuzzyMatch(str, pattern)

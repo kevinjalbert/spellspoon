@@ -3,8 +3,8 @@ local fuzzy_matcher = require("fuzzy_matcher")
 local prompt_reader = require("prompt_reader")
 local prompt_processor = require("prompt_processor")
 
-local Logger = require("logger")
-local Config = require("config")
+local Logger = require("utils.logger")
+local Config = require("utils.config")
 local Indicator = require("ui.indicator")
 
 -- Menu state
