@@ -3,6 +3,42 @@ local M = {}
 local Logger = require("logger")
 local Config = require("config")
 
+-- Initialize the SQLite database schema
+function M:initializeDatabase()
+    Logger.log("debug", "Initializing statistics database")
+
+    -- Create the transcriptions table if it doesn't exist
+    local create_table_query = [[
+        CREATE TABLE IF NOT EXISTS transcriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            characters INTEGER NOT NULL,
+            words INTEGER NOT NULL,
+            audio_length_seconds REAL NOT NULL
+        );
+    ]]
+
+    -- Create an index on created_at for faster time-based queries
+    local create_index_query = [[
+        CREATE INDEX IF NOT EXISTS idx_transcriptions_created_at
+        ON transcriptions(created_at);
+    ]]
+
+    -- Execute the queries
+    if not self:executeQuery(create_table_query) then
+        Logger.log("error", "Failed to create transcriptions table")
+        return false
+    end
+
+    if not self:executeQuery(create_index_query) then
+        Logger.log("error", "Failed to create index on created_at")
+        return false
+    end
+
+    Logger.log("debug", "Successfully initialized statistics database")
+    return true
+end
+
 -- Helper function to execute SQLite queries
 function M:executeQuery(query)
     local db_file = os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/transcription_stats.sqlite"

@@ -24,17 +24,6 @@ log_transcription_stats() {
         audio_length=$(/opt/homebrew/bin/ffprobe -i /tmp/recorded_audio.wav -show_entries format=duration -v quiet -of csv="p=0" 2>/dev/null || echo 0)
     fi
 
-    # Create database and table if they don't exist
-    if [ ! -f "$db_file" ]; then
-        sqlite3 "$db_file" "CREATE TABLE transcriptions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            characters INTEGER NOT NULL,
-            words INTEGER NOT NULL,
-            audio_length_seconds REAL NOT NULL
-        );"
-    fi
-
     # Insert stats into database, use local time for easy of use for stats
     sqlite3 "$db_file" "INSERT INTO transcriptions (created_at, characters, words, audio_length_seconds)
         VALUES (datetime('now', 'localtime'), $char_count, $word_count, $audio_length);"

@@ -38,6 +38,10 @@ local Recording = require("recording")
 local Indicator = require("ui.indicator")
 local Menu = require("ui.menu")
 local StatsModal = require("ui.stats_modal")
+local Statistics = require("statistics")
+
+-- Initialize the statistics database
+Statistics:initializeDatabase()
 
 function M:whiston()
     Indicator:cleanup()
