@@ -15,33 +15,30 @@ function M:startTranscription(callback)
         if exitCode == 0 and stdOut then
             Logger.log("debug", "Starting post-transcription transcribing")
             -- Pass transcription output to the shell script for processing
+
             local transcriptionCleaningScript = Config.handleTranscriptionCleaningScript
             local transcriptionCleaningTask = hs.task.new(transcriptionCleaningScript, function(handleExitCode, handleStdOut, handleStdErr)
                 Logger.log("debug", "Post-transcription processing finished with exit code: " .. handleExitCode)
 
                 if handleExitCode == 0 and handleStdOut then
                     Logger.log("debug", "Calling callback with processed transcript")
-                    -- Pass the processed transcript back to the caller
-                    if callback then
-                        callback(handleStdOut)
-                    end
+                    callback(handleStdOut)
                 else
                     Logger.log("error", "Post-transcription handling failed: " .. (handleStdErr or "unknown error"))
-                    if callback then
-                        callback(nil, handleStdErr or "unknown error")
-                    end
+                    callback(nil, handleStdErr or "unknown error")
                 end
             end, { "-c", stdOut })
-            transcriptionCleaningTask:setInput(stdOut) -- Provide transcription output as input
+
+            transcriptionCleaningTask:setInput(stdOut)
             transcriptionCleaningTask:start()
         else
             Logger.log("error", "Transcription failed: " .. (stdErr or "unknown error"))
-            if callback then
-                callback(nil, stdErr or "unknown error")
-            end
+            callback(nil, stdErr or "unknown error")
         end
     end, {})
+
     transcribingTask:start()
 end
 
 return M
+

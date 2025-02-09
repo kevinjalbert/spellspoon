@@ -4,6 +4,11 @@ local Logger = require("logger")
 local Config = require("config")
 
 -- Function to read prompt title from a script file
+-- The expectations of these prompt scripts are:
+-- 1. The first line is a shebang line
+-- 2. The second line is a comment line with the prompt title
+-- 3. The input is the transcript to be processed (as stdin)
+-- 4. The output is the full prompt to be used (as stdout)
 function M:readPromptFile(filename)
     Logger.log("debug", "Reading prompt file: " .. filename)
     local file = io.open(filename, "r")
@@ -32,9 +37,10 @@ function M:readPromptFile(filename)
             title = title,
             path = filename  -- Return the path instead of the prompt content
         }
+    else
+        Logger.log("warn", "Failed to get title from: " .. filename)
+        return nil
     end
-    Logger.log("warn", "Failed to get title from: " .. filename)
-    return nil
 end
 
 return M

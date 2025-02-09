@@ -11,6 +11,9 @@ M.processingTimer = nil
 
 -- Create and show the statistics modal
 function M:createStatsModal()
+
+    -- This supports the 'toggling' of the stats modal.
+    -- We delete the existing if we call this function again.
     if self.statsModal then
         self.statsModal:delete()
         self.statsModal = nil
@@ -36,7 +39,7 @@ function M:createStatsModal()
     self.statsModal[1] = {
         type = "rectangle",
         action = "fill",
-        fillColor = { red = 0.1, green = 0.1, blue = 0.1, alpha = 0.95 },
+        fillColor = { red = 0.1, green = 0.1, blue = 0.1, alpha = 0.9 },
         roundedRectRadii = { xRadius = 12, yRadius = 12 },
     }
 
@@ -227,13 +230,12 @@ function M:setStatus(message, dotColor)
     end
 end
 
+-- config = {
+--   dotColor = { red = x, green = x, blue = x, alpha = x },
+--   text = "Status text ...",
+--   showTimer = boolean
+-- }
 function M:setIndicatorStatus(config)
-    -- config = {
-    --   dotColor = { red = x, green = x, blue = x, alpha = x },
-    --   text = "Status text ...",
-    --   showTimer = boolean
-    -- }
-
     if not self.recordingIndicator then
         self:createRecordingIndicator()
     end
@@ -301,6 +303,7 @@ end
 
 function M:cleanup()
     Logger.log("debug", "UI cleanup function called")
+
     -- Stop all timers
     if self.pulseTimer then
         self.pulseTimer:stop()

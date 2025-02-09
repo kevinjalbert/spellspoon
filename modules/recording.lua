@@ -13,7 +13,6 @@ M.recordingTask = nil
 M.recordingTimer = nil
 M.startTime = nil
 M.escHotkey = nil
-M.isDirect = false
 
 function M:cleanup()
     -- Stop recording task if it exists
@@ -151,7 +150,6 @@ function M:startRecording(direct)
         end)
         self.recordingTask:start()
         self.isRecording = true
-        self.isDirect = direct -- Store the direct flag
 
         -- Show recording indicator
         UI:createRecordingIndicator()
@@ -166,7 +164,7 @@ function M:startRecording(direct)
         end)
     else
         -- Stop recording and process transcription
-        self:stopRecording(false, self.isDirect) -- Pass through the direct flag
+        self:stopRecording(false, direct)
     end
 end
 

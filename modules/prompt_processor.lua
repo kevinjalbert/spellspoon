@@ -39,72 +39,50 @@ function M:processPromptWithTranscript(promptScript, transcript)
     Logger.log("debug", "Creating processing task")
     local task = hs.task.new(handlePromptingScript, function(exitCode, stdOut, stdErr)
         -- Clean up UI after processing is complete
-        Logger.log("debug", "Cleaning up UI")
         UI:cleanup()
 
         if exitCode == 0 and stdOut then
             Logger.log("debug", "Processing successful. Output:", stdOut)
-            -- Handle clipboard paste just like in direct mode
             self:handleClipboardPaste(stdOut)
         else
             Logger.log("warn", "Processing failed with exit code:", exitCode)
-            if stdErr then
-                Logger.log("warn", "Error output:", stdErr)
-            end
+            Logger.log("warn", "Error output:", stdErr)
         end
     end)
+
     task:setInput(fullPrompt)
     task:start()
 end
 
 function M:handleClipboardPaste(text)
-    if logger then
-        Logger.log("debug", "Handling clipboard paste with text:", text)
-    end
+    Logger.log("debug", "Handling clipboard paste with text:", text)
 
     -- Store processed transcription in clipboard
     hs.pasteboard.setContents(text)
-    if logger then
-        Logger.log("debug", "Text copied to clipboard")
-    end
 
     -- Check if there's an active text field before attempting to paste
     local focused = hs.uielement.focusedElement()
     local shouldPaste = false
 
     if focused then
-        if logger then
-            Logger.log("debug", "Found focused element")
-        end
+        Logger.log("debug", "Found focused element")
         local success, role = pcall(function() return focused:role() end)
         if success and role then
-            if logger then
-                Logger.log("debug", "Element role:", role)
-            end
+            Logger.log("debug", "Element role:", role)
             shouldPaste = (role == "AXTextField" or role == "AXTextArea")
-            if logger then
-                Logger.log("debug", "Should paste:", shouldPaste)
-            end
+            Logger.log("debug", "Should paste:", shouldPaste)
         else
-            if logger then
-                Logger.log("debug", "Could not determine element role")
-            end
+            Logger.log("debug", "Could not determine element role")
         end
     else
-        if logger then
-            Logger.log("debug", "No focused element found")
-        end
+        Logger.log("debug", "No focused element found")
     end
 
     if shouldPaste then
-        if logger then
-            Logger.log("debug", "Executing paste command")
-        end
+        Logger.log("debug", "Executing paste command")
         hs.eventtap.keyStroke({"cmd"}, "v")
     else
-        if logger then
-            Logger.log("debug", "Showing clipboard notification")
-        end
+        Logger.log("debug", "Showing clipboard notification")
         hs.alert.show("Transcription copied to clipboard")
     end
 end
