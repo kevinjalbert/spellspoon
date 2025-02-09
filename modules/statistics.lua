@@ -41,7 +41,8 @@ end
 
 -- Helper function to execute SQLite queries
 function M:executeQuery(query)
-    local db_file = os.getenv("HOME") .. "/.hammerspoon/Spoons/whistion.spoon/transcription_stats.sqlite"
+    local db_file = Config.transcriptionStatsDatabase
+
     -- Wrap db_file in single quotes and query in double quotes.
     local command = string.format("/usr/bin/sqlite3 '%s' \"%s\"", db_file, query)
 
