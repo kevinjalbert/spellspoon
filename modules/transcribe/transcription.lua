@@ -2,6 +2,7 @@ local M = {}
 
 local Logger = require("utils.logger")
 local Config = require("utils.config")
+local Statistics = require("statistics.statistics")
 
 -- Helper function to trim all whitespace
 local function trim(s)
@@ -37,16 +38,7 @@ local function logTranscriptionStats(text)
         end
     end
 
-    -- Insert stats into SQLite database
-    local sqlite = hs.sqlite3.open(Config.transcriptionStatsDatabase)
-    if sqlite then
-        local query = string.format(
-            "INSERT INTO transcriptions (created_at, characters, words, audio_length_seconds) VALUES (datetime('now', 'localtime'), %d, %d, %f);",
-            charCount, wordCount, audioLength
-        )
-        sqlite:exec(query)
-        sqlite:close()
-    end
+    Statistics:insertTranscriptionStats(charCount, wordCount, audioLength)
 end
 
 function M:startTranscription(callback)

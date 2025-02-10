@@ -14,8 +14,22 @@
 --- Example:
 ---```
 ---   hs.loadSpoon("Whiston")
+---
+---   -- Optional: Override default configuration
+---   spoon.Whiston:setConfig({
+---       promptsDir = "~/whiston/prompts",
+---       transcriptionStatsDatabase = "~/whiston/transcription_stats.sqlite",
+---       handleTranscribingScript = "~/whiston/handle_transcribing.sh",
+---       handleRecordingScript = "~/whiston/handle_recording.sh",
+---       handlePromptingScript = "~/whiston/handle_prompting.sh"
+---   })
+---
+---   -- Set up hotkeys (optional)
 ---   spoon.Whiston:bindHotkeys({
 ---       whiston = {{"cmd", "alt", "ctrl"}, "w"}  -- Default binding
+---       whistonDirect = {{"cmd", "alt", "ctrl"}, "e"}  -- Default binding
+---       whistonMenu = {{"cmd", "alt", "ctrl"}, "="}  -- Default binding
+---       toggleStats = {{"cmd", "alt", "ctrl"}, "-"}  -- Default binding
 ---   })
 ---```
 ---
@@ -34,14 +48,31 @@ M.license = "MIT - https://opensource.org/licenses/MIT"
 local spoonPath = debug.getinfo(1, "S").source:sub(2):match("(.*/)")
 package.path = spoonPath .. "modules/?.lua;" .. package.path
 
+local Logger = require("utils.logger")
+
+-- Load configuration module first
+local Config = require("utils.config")
+
+-- Allow setting configuration before initialization
+function M:setConfig(config)
+    -- Expand any paths that use ~
+    local expandedConfig = {}
+    for k, v in pairs(config) do
+        if type(v) == "string" and v:match("^~") then
+            expandedConfig[k] = v:gsub("^~", os.getenv("HOME"))
+        else
+            expandedConfig[k] = v
+        end
+    end
+
+    -- Set the config using the proxy's function directly
+    Config.setConfig(expandedConfig)
+end
+
 local Recording = require("record.recording")
 local Indicator = require("ui.indicator")
 local Menu = require("menu.menu")
 local StatsModal = require("ui.stats_modal")
-local Statistics = require("statistics.statistics")
-
--- Initialize the statistics database
-Statistics:initializeDatabase()
 
 function M:whiston()
     Indicator:cleanup()
@@ -83,8 +114,8 @@ function M:bindHotkeys(mapping)
     local def = {
         whiston = {{"cmd", "alt", "ctrl"}, "w"},
         whistonDirect = {{"cmd", "alt", "ctrl"}, "e"},
-        whistonMenu = {{"cmd", "alt", "ctrl", "shift"}, "="},
-        toggleStats = {{"cmd", "alt", "ctrl", "shift"}, "-"}
+        whistonMenu = {{"cmd", "alt", "ctrl"}, "="},
+        toggleStats = {{"cmd", "alt", "ctrl"}, "-"}
     }
     if mapping then
         for k,v in pairs(mapping) do
