@@ -133,7 +133,7 @@ function M:insertTranscriptionStats(charCount, wordCount, audioLength)
         "INSERT INTO transcriptions (created_at, characters, words, audio_length_seconds) VALUES (datetime('now', 'localtime'), %d, %d, %f);",
         charCount, wordCount, audioLength
     )
-    return M:executeQuery(query)
+    return self:executeQuery(query)
 end
 
 -- Get stats for a specific time filter
