@@ -1,47 +1,45 @@
---- === Whiston ===
+--- === Spellspoon ===
 ---
---- A Hammerspoon Spoon that provides audio recording and transcription functionality.
+--- A Hammerspoon Spoon for Audio Recording and Transcription
+---
+--- SpellSpoon provides hotkey-driven audio recording, transcription, and prompting functionality.
+--- A configurable shell script pipeline is used to handle the recording, transcription, and prompting.
 ---
 --- Features:
----  * Start/stop audio recording with a configurable hotkey (default: cmd+alt+ctrl+w)
----  * Automatic transcription of recorded audio
----  * Visual feedback through UI elements during recording
+--- - Hotkey control for recording.
+--- - Customizable shell script pipelines for recording, transcribing, and prompting.
+--- - Flexible prompt-based text transformation.
+--- - Clipboard and direct pasting support.
+--- - Tracks transcription stats (duration, word count, character count).
+--- - Customization of scripts allows for custom prompts, transcription, recording, and services used.
+
+--- Configuration:
 ---
---- Usage:
----  * Load and configure the spoon in your Hammerspoon configuration
----  * Use the default hotkey or configure custom bindings
+--- local spellspoon = hs.loadSpoon("spellspoon")
+--- spellspoon:setConfig({
+---     promptsDir = "~/.spellspoon/prompts",
+---     transcriptionStatsDatabase = "~/.spellspoon/transcription_stats.sqlite",
+---     handleTranscribingScript = "~/.spellspoon/handle_transcribing.sh",
+---     handleRecordingScript = "~/.spellspoon/handle_recording.sh",
+---     handlePromptingScript = "~/.spellspoon/handle_prompting.sh",
+---     logLevel = "debug"
+--- })
+--- spellspoon:bindHotkeys({
+---     spellspoon = {{"cmd", "alt", "ctrl", "shift"}, "]"},
+---     spellspoonDirect = {{"cmd", "alt", "ctrl", "shift"}, "["},
+---     spellspoonMenu = {{"cmd", "alt", "ctrl", "shift"}, "="},
+---     toggleStats = {{"cmd", "alt", "ctrl", "shift"}, "-"}
+--- })
 ---
---- Example:
----```
----   hs.loadSpoon("Whiston")
----
----   -- Optional: Override default configuration
----   spoon.Whiston:setConfig({
----       promptsDir = "~/whiston/prompts",
----       transcriptionStatsDatabase = "~/whiston/transcription_stats.sqlite",
----       handleTranscribingScript = "~/whiston/handle_transcribing.sh",
----       handleRecordingScript = "~/whiston/handle_recording.sh",
----       handlePromptingScript = "~/whiston/handle_prompting.sh"
----   })
----
----   -- Set up hotkeys (optional)
----   spoon.Whiston:bindHotkeys({
----       whiston = {{"cmd", "alt", "ctrl"}, "w"}  -- Default binding
----       whistonDirect = {{"cmd", "alt", "ctrl"}, "e"}  -- Default binding
----       whistonMenu = {{"cmd", "alt", "ctrl"}, "="}  -- Default binding
----       toggleStats = {{"cmd", "alt", "ctrl"}, "-"}  -- Default binding
----   })
----```
----
---- Download: xxxxx
+--- Download: https://github.com/kevinjalbert/spellspoon
 
 local M = {}
 
 -- Metadata
-M.name = "Whistion"
+M.name = "Spellspoon"
 M.version = "1.0"
 M.author = "Kevin Jalbert <kevin.j.jalbert@gmail.com>"
-M.homepage = "https://github.com/kevinjalbert/whiston"
+M.homepage = "https://github.com/kevinjalbert/spellspoon"
 M.license = "MIT - https://opensource.org/licenses/MIT"
 
 -- Load modules from the Spoon's modules directory
@@ -74,7 +72,7 @@ local Indicator = require("ui.indicator")
 local Menu = require("menu.menu")
 local StatsModal = require("ui.stats_modal")
 
-function M:whiston()
+function M:spellspoon()
     Indicator:cleanup()
     if not Recording.isRecording then
         Recording:startRecording()
@@ -83,7 +81,7 @@ function M:whiston()
     end
 end
 
-function M:whistonDirect()
+function M:spellspoonDirect()
     Indicator:cleanup()
     if not Recording.isRecording then
         Recording:startRecording(true)  -- Pass true for direct mode
@@ -92,7 +90,7 @@ function M:whistonDirect()
     end
 end
 
-function M:whistonMenu()
+function M:spellspoonMenu()
     Indicator:cleanup()
     -- Get the currently focused element
     local element = hs.uielement.focusedElement()
@@ -112,9 +110,9 @@ end
 
 function M:bindHotkeys(mapping)
     local def = {
-        whiston = {{"cmd", "alt", "ctrl"}, "w"},
-        whistonDirect = {{"cmd", "alt", "ctrl"}, "e"},
-        whistonMenu = {{"cmd", "alt", "ctrl"}, "="},
+        spellspoon = {{"cmd", "alt", "ctrl"}, "w"},
+        spellspoonDirect = {{"cmd", "alt", "ctrl"}, "e"},
+        spellspoonMenu = {{"cmd", "alt", "ctrl"}, "="},
         toggleStats = {{"cmd", "alt", "ctrl"}, "-"}
     }
     if mapping then
@@ -125,12 +123,12 @@ function M:bindHotkeys(mapping)
 
     for k,v in pairs(def) do
         if v[1] and v[2] then
-            if k == "whiston" then
-                hs.hotkey.bind(v[1], v[2], function() self:whiston() end)
-            elseif k == "whistonDirect" then
-                hs.hotkey.bind(v[1], v[2], function() self:whistonDirect() end)
-            elseif k == "whistonMenu" then
-                hs.hotkey.bind(v[1], v[2], function() self:whistonMenu() end)
+            if k == "spellspoon" then
+                hs.hotkey.bind(v[1], v[2], function() self:spellspoon() end)
+            elseif k == "spellspoonDirect" then
+                hs.hotkey.bind(v[1], v[2], function() self:spellspoonDirect() end)
+            elseif k == "spellspoonMenu" then
+                hs.hotkey.bind(v[1], v[2], function() self:spellspoonMenu() end)
             elseif k == "toggleStats" then
                 hs.hotkey.bind(v[1], v[2], function() self:toggleStats() end)
             end

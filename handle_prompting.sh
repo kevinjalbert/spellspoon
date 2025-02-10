@@ -1,43 +1,36 @@
 #!/bin/bash
-set -x
 
 source .env
-
-# Source environment variables from .env file
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-if [ -f "$SCRIPT_DIR/.env" ]; then
-    source "$SCRIPT_DIR/.env"
-fi
 
 # Read input from stdin
 input=$(cat)
 
 # Validate environment variables and set defaults
-if [ -z "$WHISTION_API_KEY" ]; then
-    echo "Error: WHISTION_API_KEY environment variable must be set" >&2
+if [ -z "$AI_API_KEY" ]; then
+    echo "Error: AI_API_KEY environment variable must be set" >&2
     exit 1
 fi
 
-if [ -z "$WHISTION_API_URL" ]; then
-    WHISTION_API_URL="https://api.openai.com/v1/"
+if [ -z "$AI_API_URL" ]; then
+    AI_API_URL="https://api.openai.com/v1/"
 fi
 
-if [ -z "$WHISTION_MODEL" ]; then
-  echo "Error: WHISTION_MODEL environment variable must be set" >&2
+if [ -z "$AI_MODEL" ]; then
+  echo "Error: aI_MODEL environment variable must be set" >&2
   exit 1
 fi
 
 # Prepare the JSON payload
-json=$(/opt/homebrew/bin/jq -n --arg content "$input" --arg model "$WHISTION_MODEL" '{
+json=$(/opt/homebrew/bin/jq -n --arg content "$input" --arg model "$AI_MODEL" '{
     model: $model,
     messages: [{role: "user", content: $content}],
     temperature: 0.7
 }')
 
 # Make the API request
-response=$(curl -s -X POST "$WHISTION_API_URL/chat/completions" \
+response=$(curl -s -X POST "$AI_API_URL/chat/completions" \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $WHISTION_API_KEY" \
+    -H "Authorization: Bearer $AI_API_KEY" \
     -d "$json")
 
 # Check for API errors
