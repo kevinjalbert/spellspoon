@@ -6,7 +6,8 @@ local defaults = {
     transcriptionStatsDatabase = hs.spoons.scriptPath() .. "../../transcription_stats.sqlite",
     handleTranscribingScript = hs.spoons.scriptPath() .. "../../handle_transcribing.sh",
     handleRecordingScript = hs.spoons.scriptPath() .. "../../handle_recording.sh",
-    handlePromptingScript = hs.spoons.scriptPath() .. "../../handle_prompting.sh"
+    handlePromptingScript = hs.spoons.scriptPath() .. "../../handle_prompting.sh",
+    logLevel = "info"
 }
 
 -- User configuration (empty by default)
