@@ -140,7 +140,7 @@ function M:startRecording(direct)
     if not self.isRecording then
         -- Start recording
         Logger.log("debug", "Starting recording")
-        local recordingScript = Config.handleRecordingScript
+        local recordingScript = Config.recordingScript
         Logger.log("debug", "Running recording script: " .. recordingScript)
         self.recordingTask = hs.task.new(recordingScript, function(exitCode, stdOut, stdErr)
             -- Don't do any cleanup here, just log the error if there is one

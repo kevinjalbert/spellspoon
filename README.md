@@ -29,11 +29,11 @@ Example setup in Hammerspoon:
 local spellspoon = hs.loadSpoon("spellspoon")
 
 spellspoon:setConfig({
-    promptsDir = "~/.spellspoon/prompts",
+    promptsDirectory = "~/.spellspoon/prompts",
     transcriptionStatsDatabase = "~/.spellspoon/transcription_stats.sqlite",
-    handleTranscribingScript = "~/.spellspoon/handle_transcribing.sh",
-    handleRecordingScript = "~/.spellspoon/handle_recording.sh",
-    handlePromptingScript = "~/.spellspoon/handle_prompting.sh",
+    transcribingScript = "~/.spellspoon/transcribing.sh",
+    recordingScript = "~/.spellspoon/recording.sh",
+    promptingScript = "~/.spellspoon/prompting.sh",
     logLevel = "debug"
 })
 

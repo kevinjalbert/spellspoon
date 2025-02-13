@@ -44,7 +44,7 @@ end
 function M:startTranscription(callback)
     Logger.log("debug", "Starting transcription process")
 
-    local transcribingScript = Config.handleTranscribingScript
+    local transcribingScript = Config.transcribingScript
     Logger.log("debug", "Running transcription script: " .. transcribingScript)
 
     local transcribingTask = hs.task.new(transcribingScript, function(exitCode, stdOut, stdErr)

@@ -34,10 +34,10 @@ function M:processPromptWithTranscript(promptScript, transcript)
     end
 
     -- Create a task to process the prompt
-    local handlePromptingScript = Config.handlePromptingScript
-    Logger.log("debug", "Handle prompting script:", handlePromptingScript)
+    local promptingScript = Config.promptingScript
+    Logger.log("debug", "Handle prompting script:", promptingScript)
     Logger.log("debug", "Creating processing task")
-    local task = hs.task.new(handlePromptingScript, function(exitCode, stdOut, stdErr)
+    local task = hs.task.new(promptingScript, function(exitCode, stdOut, stdErr)
         -- Clean up UI after processing is complete
         Indicator:cleanup()
 

@@ -17,11 +17,11 @@
 ---
 --- local spellspoon = hs.loadSpoon("spellspoon")
 --- spellspoon:setConfig({
----     promptsDir = "~/.spellspoon/prompts",
+---     promptsDirectory = "~/.spellspoon/prompts",
 ---     transcriptionStatsDatabase = "~/.spellspoon/transcription_stats.sqlite",
----     handleTranscribingScript = "~/.spellspoon/handle_transcribing.sh",
----     handleRecordingScript = "~/.spellspoon/handle_recording.sh",
----     handlePromptingScript = "~/.spellspoon/handle_prompting.sh",
+---     transcribingScript = "~/.spellspoon/handle_transcribing.sh",
+---     recordingScript = "~/.spellspoon/handle_recording.sh",
+---     promptingScript = "~/.spellspoon/handle_prompting.sh",
 ---     logLevel = "debug"
 --- })
 --- spellspoon:bindHotkeys({

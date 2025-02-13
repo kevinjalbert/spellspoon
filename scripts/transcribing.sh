@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env
+source ~/.hammerspoon/Spoons/spellspoon.spoon/.env
 
 # Default values
 MODEL_PATH="$HOME/Downloads/ggml-large-v3-turbo-q5_0.bin"

@@ -17,8 +17,8 @@ function M:refreshMenuOptions()
     self.menuChoices = {}
     self.prompts = {}
 
-    local promptsDir = Config.promptsDir
-    local iter, dir_obj = hs.fs.dir(promptsDir)
+    local promptsDirectory = Config.promptsDirectory
+    local iter, dir_obj = hs.fs.dir(promptsDirectory)
     local files = {}
 
     -- First collect all filenames
@@ -36,7 +36,7 @@ function M:refreshMenuOptions()
 
     -- Process files in sorted order
     for _, file in ipairs(files) do
-        local promptData = prompt_reader:readPromptFile(promptsDir .. "/" .. file)
+        local promptData = prompt_reader:readPromptFile(promptsDirectory .. "/" .. file)
         if promptData then
             table.insert(self.menuChoices, {
                 text = promptData.title,

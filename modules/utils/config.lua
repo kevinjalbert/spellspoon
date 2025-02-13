@@ -2,11 +2,11 @@ local Config = {}
 
 -- Default configuration with absolute paths
 local defaults = {
-    promptsDir = hs.spoons.scriptPath() .. "../../prompts",
+    promptsDirectory = hs.spoons.scriptPath() .. "../../prompts",
     transcriptionStatsDatabase = hs.spoons.scriptPath() .. "../../transcription_stats.sqlite",
-    handleTranscribingScript = hs.spoons.scriptPath() .. "../../handle_transcribing.sh",
-    handleRecordingScript = hs.spoons.scriptPath() .. "../../handle_recording.sh",
-    handlePromptingScript = hs.spoons.scriptPath() .. "../../handle_prompting.sh",
+    transcribingScript = hs.spoons.scriptPath() .. "../../scripts/transcribing.sh",
+    recordingScript = hs.spoons.scriptPath() .. "../../scripts/recording.sh",
+    promptingScript = hs.spoons.scriptPath() .. "../../scripts/prompting.sh",
     logLevel = "info"
 }
 

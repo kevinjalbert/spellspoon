@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env
+source ~/.hammerspoon/Spoons/spellspoon.spoon/.env
 
 # Read input from stdin
 input=$(cat)
@@ -39,7 +39,6 @@ if /opt/homebrew/bin/jq -e .error <<<"$response" >/dev/null; then
     exit 1
 fi
 
-# Extract and output just the message content, then trim whitespace
+# Extract and output just the message content
 content=$(/opt/homebrew/bin/jq -r '.choices[0].message.content' <<<"$response")
-trimmed=$(echo "$content" | tr -d '\r' | awk 'NF { gsub(/^[ \t]+|[ \t]+$/, ""); print }')
-printf "%s" "$trimmed"
+printf "%s" "$content"

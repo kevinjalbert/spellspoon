@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env
+source ~/.hammerspoon/Spoons/spellspoon.spoon/.env
 
 # Default values
 SAMPLE_RATE=16000
