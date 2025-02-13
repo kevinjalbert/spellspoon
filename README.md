@@ -38,10 +38,10 @@ spellspoon:setConfig({
 })
 
 spellspoon:bindHotkeys({
-    spellspoon = {{"cmd", "alt", "ctrl", "shift"}, "]"},
-    spellspoonDirect = {{"cmd", "alt", "ctrl", "shift"}, "["},
-    spellspoonMenu = {{"cmd", "alt", "ctrl", "shift"}, "="},
-    toggleStats = {{"cmd", "alt", "ctrl", "shift"}, "-"}
+    recordWithDefaultPrompt = {{"cmd", "alt", "ctrl", "shift"}, "["},
+    recordWithPromptSelection = {{"cmd", "alt", "ctrl", "shift"}, "]"},
+    useSelectedTextWithPromptSelection = {{"cmd", "alt", "ctrl", "shift"}, "="},
+    showStatsModal = {{"cmd", "alt", "ctrl", "shift"}, "-"}
 })
 ```
 

@@ -72,16 +72,7 @@ local Indicator = require("ui.indicator")
 local Menu = require("menu.menu")
 local StatsModal = require("ui.stats_modal")
 
-function M:spellspoon()
-    Indicator:cleanup()
-    if not Recording.isRecording then
-        Recording:startRecording()
-    else
-        Recording:stopRecording(false)
-    end
-end
-
-function M:spellspoonDirect()
+function M:recordWithDefaultPrompt()
     Indicator:cleanup()
     if not Recording.isRecording then
         Recording:startRecording(true)  -- Pass true for direct mode
@@ -90,7 +81,16 @@ function M:spellspoonDirect()
     end
 end
 
-function M:spellspoonMenu()
+function M:recordWithPromptSelection()
+    Indicator:cleanup()
+    if not Recording.isRecording then
+        Recording:startRecording()
+    else
+        Recording:stopRecording(false)
+    end
+end
+
+function M:useSelectedTextWithPromptSelection()
     Indicator:cleanup()
     -- Get the currently focused element
     local element = hs.uielement.focusedElement()
@@ -104,16 +104,16 @@ function M:spellspoonMenu()
     end
 end
 
-function M:toggleStats()
+function M:showStatsModal()
     StatsModal:toggleStatsModal()
 end
 
 function M:bindHotkeys(mapping)
     local def = {
-        spellspoon = {{"cmd", "alt", "ctrl"}, "w"},
-        spellspoonDirect = {{"cmd", "alt", "ctrl"}, "e"},
-        spellspoonMenu = {{"cmd", "alt", "ctrl"}, "="},
-        toggleStats = {{"cmd", "alt", "ctrl"}, "-"}
+        recordWithDefaultPrompt = {{"cmd", "alt", "ctrl"}, "["},
+        recordWithPromptSelection= {{"cmd", "alt", "ctrl"}, "]"},
+        useSelectedTextWithPromptSelection = {{"cmd", "alt", "ctrl"}, "="},
+        showStatsModal = {{"cmd", "alt", "ctrl"}, "-"}
     }
     if mapping then
         for k,v in pairs(mapping) do
@@ -123,14 +123,14 @@ function M:bindHotkeys(mapping)
 
     for k,v in pairs(def) do
         if v[1] and v[2] then
-            if k == "spellspoon" then
-                hs.hotkey.bind(v[1], v[2], function() self:spellspoon() end)
-            elseif k == "spellspoonDirect" then
-                hs.hotkey.bind(v[1], v[2], function() self:spellspoonDirect() end)
-            elseif k == "spellspoonMenu" then
-                hs.hotkey.bind(v[1], v[2], function() self:spellspoonMenu() end)
-            elseif k == "toggleStats" then
-                hs.hotkey.bind(v[1], v[2], function() self:toggleStats() end)
+            if k == "recordWithDefaultPrompt" then
+                hs.hotkey.bind(v[1], v[2], function() self:recordWithDefaultPrompt() end)
+            elseif k == "recordWithPromptSelection" then
+                hs.hotkey.bind(v[1], v[2], function() self:recordWithPromptSelection() end)
+            elseif k == "useSelectedTextWithPromptSelection" then
+                hs.hotkey.bind(v[1], v[2], function() self:useSelectedTextWithPromptSelection() end)
+            elseif k == "showStatsModal" then
+                hs.hotkey.bind(v[1], v[2], function() self:showStatsModal() end)
             end
         end
     end
