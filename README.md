@@ -65,7 +65,7 @@ TODO: Add GIF or Screencast
 
 ## High-level Overview
 
-TODO: Add Excalidraw diagram
+![](spellspoon.excalidraw.png)
 
 ## Customization
 
