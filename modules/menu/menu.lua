@@ -67,7 +67,12 @@ function M:showMenu(transcript)
     -- Create a chooser with our menu options
     local chooser = hs.chooser.new(function(choice)
         Logger.log("debug", "Menu choice made: " .. (choice and choice.text or "cancelled"))
-        -- Clean up menu-specific state
+
+        -- Disable the esckey binding if it is still active
+        if self.escHotkey ~=nil then
+            self.escHotkey:delete()
+            self.escHotkey = nil
+        end
 
         if not choice then
             -- User cancelled without selection
@@ -102,7 +107,11 @@ function M:showMenu(transcript)
     self.escHotkey = hs.hotkey.bind({}, "escape", function()
         Logger.log("debug", "Menu escape pressed")
         chooser:hide()
-        self.escHotkey:delete()
+
+        if self.escHotkey ~=nil then
+            self.escHotkey:delete()
+            self.escHotkey = nil
+        end
     end)
 
     -- Show the menu
