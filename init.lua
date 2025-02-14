@@ -1,6 +1,6 @@
 --- === Spellspoon ===
 ---
---- A Hammerspoon Spoon for Audio Recording and Transcription
+--- A macOS tool built using Hammerspoon for Audio Recording and Transcription
 ---
 --- SpellSpoon provides hotkey-driven audio recording, transcription, and prompting functionality.
 --- A configurable shell script pipeline is used to handle the recording, transcription, and prompting.

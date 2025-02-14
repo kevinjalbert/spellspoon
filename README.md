@@ -1,8 +1,6 @@
 # Spellspoon
 
-Spellspoon is a Hammerspoon Spoon that enables hotkey-driven audio recording, transcription, and text processing. It
-provides an efficient way to transcribe voice input and apply customizable prompts to manipulate text before copying it
-to the clipboard or pasting it directly.
+Spellspoon is a macOS tool built using Hammerspoon that enables hotkey-driven audio recording, transcription, and text processing. It provides an efficient way to transcribe voice input and apply customizable prompts to manipulate text before copying it to the clipboard and pasting it directly.
 
 ## Demo
 
