@@ -4,6 +4,10 @@ Spellspoon is a Hammerspoon Spoon that enables hotkey-driven audio recording, tr
 provides an efficient way to transcribe voice input and apply customizable prompts to manipulate text before copying it
 to the clipboard or pasting it directly.
 
+## Demo
+
+https://github.com/user-attachments/assets/34420500-bd55-4297-a52c-1321ea521650
+
 ## Features
 
 - Hotkey-based recording and transcription.
@@ -44,24 +48,6 @@ spellspoon:bindHotkeys({
     showStatsModal = {{"cmd", "alt", "ctrl", "shift"}, "-"}
 })
 ```
-
-## Usage
-
-## Direct Dictation
-
-TODO: Add GIF or Screencast
-
-## Dictation with Menu Select
-
-TODO: Add GIF or Screencast
-
-## Prompt-Based Text Transformation Using Menu Select
-
-TODO: Add GIF or Screencast
-
-## Show Transcription Statistics
-
-TODO: Add GIF or Screencast
 
 ## High-level Overview
 
