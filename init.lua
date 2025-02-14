@@ -37,7 +37,7 @@ local M = {}
 
 -- Metadata
 M.name = "Spellspoon"
-M.version = "1.0"
+M.version = "0.1.0"
 M.author = "Kevin Jalbert <kevin.j.jalbert@gmail.com>"
 M.homepage = "https://github.com/kevinjalbert/spellspoon"
 M.license = "MIT - https://opensource.org/licenses/MIT"
