@@ -55,6 +55,8 @@ spellspoon:bindHotkeys({
 
 Spellspoon is highly customizable, allowing you to tailor its functionality to your specific needs. Here's a breakdown of the various components and their configuration options:
 
+> Note: The all shell scripts are executed with a minimal environment. If you need to use any system-specific commands, you will need to source a `.env` file to set the necessary environment variables, or use absolute paths for utilities.
+
 ### Operational Scripts
 
 These scripts are responsible for orchestrating the various components of the system. They are responsible for starting and stopping recording, transcribing, and prompting. They are just shell scripts and can be customized to fit your specific needs.
