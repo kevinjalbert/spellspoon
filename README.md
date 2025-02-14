@@ -17,6 +17,8 @@ https://github.com/user-attachments/assets/34420500-bd55-4297-a52c-1321ea521650
 
 ## Installation
 
+First, have [Hammerspoon](https://www.hammerspoon.org/) installed.
+
 Clone the repository and place the `spellspoon.spoon` directory inside `~/.hammerspoon/Spoons/`:
 
 ```sh
