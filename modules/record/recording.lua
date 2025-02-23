@@ -7,6 +7,13 @@ local Transcription = require("transcribe.transcription")
 local Menu = require("menu.menu")
 local PromptProcessor = require("prompt.prompt_processor")
 
+-- Recording modes
+M.RecordingMode = {
+    WITH_PROMPT = "with_prompt",          -- Show prompt selection menu
+    DEFAULT_PROMPT = "default_prompt",    -- Use first available prompt
+    NO_PROMPT = "no_prompt"               -- Direct to clipboard/paste
+}
+
 -- Recording state
 M.isRecording = false
 M.recordingTask = nil
@@ -41,14 +48,16 @@ function M:cleanup()
     end
 end
 
-function M:stopRecording(interrupted, direct)
+function M:stopRecording(interrupted, mode)
     -- Clean up hotkeys (we used esc to get here)
     if self.escHotkey then
         self.escHotkey:delete()
         self.escHotkey = nil
     end
 
-    Logger.log("debug", "Stopping recording" .. (interrupted and " (interrupted)" or "") .. (direct and " (direct)" or ""))
+    Logger.log("debug", "Stopping recording" ..
+        (interrupted and " (interrupted)" or "") ..
+        (mode and " mode: " .. mode or ""))
 
     -- If there's no recording task, nothing to do
     if not self.recordingTask then
@@ -104,30 +113,27 @@ function M:stopRecording(interrupted, direct)
                 end
 
                 if transcript then
-                    if direct then
-                        -- For direct prompting, use the first available prompt
+                    if mode == self.RecordingMode.NO_PROMPT then
+                        -- For no-prompt mode, just copy to clipboard and paste
+                        Indicator:cleanup()
+                        PromptProcessor:handleClipboardPaste(transcript)
+                    elseif mode == self.RecordingMode.DEFAULT_PROMPT then
+                        -- For default prompt, use the first available prompt
                         Menu:refreshMenuOptions()
                         if #Menu.menuChoices > 0 then
                             local firstPromptScriptPath = Menu.prompts[Menu.menuChoices[1].text]
                             if firstPromptScriptPath then
-                                -- Get the prompt script path and process with transcript
-                                if firstPromptScriptPath then
-                                    Logger.log("debug", "Using prompt script: " .. firstPromptScriptPath)
-
-                                    Indicator:cleanup()
-
-                                    PromptProcessor:processPromptWithTranscript(firstPromptScriptPath, transcript)
-                                else
-                                    Logger.log("error", "Failed to get prompt script path for first prompt")
-                                end
+                                Logger.log("debug", "Using prompt script: " .. firstPromptScriptPath)
+                                Indicator:cleanup()
+                                PromptProcessor:processPromptWithTranscript(firstPromptScriptPath, transcript)
+                            else
+                                Logger.log("error", "Failed to get prompt script path for first prompt")
                             end
                         else
-                            -- Log error if no prompts are available
                             Logger.log("error", "No prompts available")
                         end
                     else
                         -- Show the menu with the processed transcript
-                        -- UI cleanup will happen in the menu module when menu is shown
                         Menu:showMenu(transcript)
                     end
                 end
@@ -136,7 +142,9 @@ function M:stopRecording(interrupted, direct)
     )
 end
 
-function M:startRecording(direct)
+function M:startRecording(mode)
+    mode = mode or self.RecordingMode.WITH_PROMPT
+
     if not self.isRecording then
         -- Start recording
         Logger.log("debug", "Starting recording")
@@ -164,7 +172,7 @@ function M:startRecording(direct)
         end)
     else
         -- Stop recording and process transcription
-        self:stopRecording(false, direct)
+        self:stopRecording(false, mode)
     end
 end
 

@@ -27,6 +27,7 @@
 --- spellspoon:bindHotkeys({
 ---     recordWithDefaultPrompt = {{"cmd", "alt", "ctrl", "shift"}, "]"},
 ---     recordWithPromptSelection = {{"cmd", "alt", "ctrl", "shift"}, "["},
+---     recordWithoutPrompt = {{"cmd", "alt", "ctrl", "shift"}, ";"},
 ---     useSelectedTextWithPromptSelection = {{"cmd", "alt", "ctrl", "shift"}, "="},
 ---     showStatsModal = {{"cmd", "alt", "ctrl", "shift"}, "-"}
 --- })
@@ -75,18 +76,18 @@ local StatsModal = require("ui.stats_modal")
 function M:recordWithDefaultPrompt()
     Indicator:cleanup()
     if not Recording.isRecording then
-        Recording:startRecording(true)  -- Pass true for direct mode
+        Recording:startRecording(Recording.RecordingMode.DEFAULT_PROMPT)
     else
-        Recording:stopRecording(false, true)  -- Not interrupted, but direct mode
+        Recording:stopRecording(false, Recording.RecordingMode.DEFAULT_PROMPT)
     end
 end
 
 function M:recordWithPromptSelection()
     Indicator:cleanup()
     if not Recording.isRecording then
-        Recording:startRecording()
+        Recording:startRecording(Recording.RecordingMode.WITH_PROMPT)
     else
-        Recording:stopRecording(false)
+        Recording:stopRecording(false, Recording.RecordingMode.WITH_PROMPT)
     end
 end
 
@@ -108,10 +109,20 @@ function M:showStatsModal()
     StatsModal:toggleStatsModal()
 end
 
+function M:recordWithoutPrompt()
+    Indicator:cleanup()
+    if not Recording.isRecording then
+        Recording:startRecording(Recording.RecordingMode.NO_PROMPT)
+    else
+        Recording:stopRecording(false, Recording.RecordingMode.NO_PROMPT)
+    end
+end
+
 function M:bindHotkeys(mapping)
     local def = {
         recordWithDefaultPrompt = {{"cmd", "alt", "ctrl"}, "["},
         recordWithPromptSelection= {{"cmd", "alt", "ctrl"}, "]"},
+        recordWithoutPrompt = {{"cmd", "alt", "ctrl"}, ";"},
         useSelectedTextWithPromptSelection = {{"cmd", "alt", "ctrl"}, "="},
         showStatsModal = {{"cmd", "alt", "ctrl"}, "-"}
     }
@@ -127,6 +138,8 @@ function M:bindHotkeys(mapping)
                 hs.hotkey.bind(v[1], v[2], function() self:recordWithDefaultPrompt() end)
             elseif k == "recordWithPromptSelection" then
                 hs.hotkey.bind(v[1], v[2], function() self:recordWithPromptSelection() end)
+            elseif k == "recordWithoutPrompt" then
+                hs.hotkey.bind(v[1], v[2], function() self:recordWithoutPrompt() end)
             elseif k == "useSelectedTextWithPromptSelection" then
                 hs.hotkey.bind(v[1], v[2], function() self:useSelectedTextWithPromptSelection() end)
             elseif k == "showStatsModal" then
